@@ -38,10 +38,10 @@ let decodeTextResult = Json.Decode.array(Json.Decode.array(Json.Decode.option(de
 
 let getStyleFor: string => JsxDOM.style = (abbr: string) =>
   switch abbr {
-  | "BHSA" => {fontFamily: "SBL Biblit", fontSize: "1.4rem", direction: "rtl"}
-  | "LXXR" => {fontFamily: "SBL Biblit", fontSize: "1.2rem"}
-  | "NA1904" => {fontFamily: "SBL Biblit", fontSize: "1.2rem"}
-  | "APF" => {fontFamily: "SBL Biblit", fontSize: "1.2rem"}
+  | "BHSA" => {fontFamily: "SBL BibLit", fontSize: "1.4rem", direction: "rtl"}
+  | "LXXR" => {fontFamily: "SBL BibLit", fontSize: "1.2rem"}
+  | "NA1904" => {fontFamily: "SBL BibLit", fontSize: "1.2rem"}
+  | "APF" => {fontFamily: "SBL BibLit", fontSize: "1.2rem"}
   | _ => {fontSize: "1rem"}
   }
 

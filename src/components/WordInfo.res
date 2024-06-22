@@ -93,7 +93,7 @@ let make = () => {
           justifyContent: "space-between",
           alignItems: "center",
           fontSize: "2rem",
-          fontFamily: "SBL Biblit",
+          fontFamily: "SBL BibLit",
           padding: "0 1rem 0.8rem",
         }}>
         <b> {lexeme->React.string} </b>
