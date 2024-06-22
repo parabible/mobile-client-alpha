@@ -45,7 +45,7 @@ let make = (
         switch data {
         | Belt.Result.Error(e) => e->Console.error
         | Belt.Result.Ok(data) => {
-            let columnHasData = data->Array.mapWithIndex(
+            let columnHasData = data->Array.at(0)->Option.getOr([])->Array.mapWithIndex(
               (_, i) => {
                 let onlyColumnI = data->Array.map(row => row[i]->Option.getOr(None))
                 onlyColumnI->Array.some(t => Option.isSome(t))
