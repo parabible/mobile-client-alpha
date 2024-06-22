@@ -1,0 +1,11 @@
+td.verseText {
+  padding: 0.5em;
+}
+
+button.word {
+  all: unset;
+  cursor: pointer;
+}
+button.word:hover {
+  color: #005a9e
+}

@@ -1,0 +1,153 @@
+%%raw(`import './ParallelReader.css';`)
+@send
+external scrollToPoint: (Dom.element, ~x: int, ~y: int, ~duration: int) => unit = "scrollToPoint"
+
+let baseUrl = "https://dev.parabible.com/api/v2"
+
+let apiEndpoint = baseUrl ++ "/text"
+
+let getUrl = (reference: string, editionsString: string) =>
+  `${apiEndpoint}?reference=${reference}&modules=${editionsString}`
+
+let textualEditionsAsString = (textualEditions: array<Zustand.textualEdition>) =>
+  textualEditions->Array.map(m => m.abbreviation)->Array.join(",")
+
+let getChapterData = async (
+  reference: Zustand.reference,
+  textualEditionsToDisplay: array<Zustand.textualEdition>,
+) => {
+  let textualEditionsToDisplayAbbreviations = textualEditionsToDisplay->textualEditionsAsString
+  let url = getUrl(`${reference.book} ${reference.chapter}`, textualEditionsToDisplayAbbreviations)
+  let response = await Fetch.fetch(url, {method: #GET})
+  let json = await response->Fetch.Response.json
+  json->Json.decode(TextObject.decodeTextResult)
+}
+
+@react.component
+let make = (
+  ~reference: Zustand.reference,
+  ~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>,
+) => {
+  let buttonRef = React.useRef(Nullable.null)
+  let (chapterData, setChapterData) = React.useState(_ => [])
+  let setReference = Zustand.store->Zustand.SomeStore.use(state => state.setReference)
+  let textualEditions = Zustand.store->Zustand.SomeStore.use(state => state.textualEditions)
+  let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
+  let (textualEditionsToDisplay, setTextualEditionsToDisplay) = React.useState(_ => [])
+
+  // can't pass an array to useEffect, so serialize it
+  let serializedTextualEditionsToDisplay =
+    enabledTextualEditions->Array.map(m => string_of_int(m.id))->Array.join(",")
+
+  React.useEffect2(() => {
+    if enabledTextualEditions->Js.Array.length > 0 {
+      let _ = getChapterData(reference, enabledTextualEditions)->Promise.then(data => {
+        switch data {
+        | Belt.Result.Error(e) => e->Console.error
+        | Belt.Result.Ok(data) => {
+            let columnHasData = data->Array.mapWithIndex(
+              (_, i) => {
+                let onlyColumnI = data->Array.map(row => row[i]->Option.getOr(None))
+                onlyColumnI->Array.some(t => Option.isSome(t))
+              },
+            )
+            let newTextualEditionsToDisplay =
+              enabledTextualEditions->Array.filterWithIndex(
+                (_, i) => columnHasData[i]->Option.getOr(false),
+              )
+            setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
+            let newChapterData =
+              data->Array.map(
+                row => row->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false)),
+              )
+            setChapterData(_ => newChapterData)
+            // let y = switch buttonRef.current {
+            // | Value(node) => {
+            //     // top of the button
+            //     let rect = node->Webapi.Dom.Element.getBoundingClientRect
+            //     rect["height"]
+            //     0
+            //   }
+            // | Null | Undefined => 0
+            // }
+            // y->Console.log
+            // |Value(node) => {
+            //   // bottom of the button
+            //   let rect = node->Webapi.Dom.Element.getBoundingClientRect->Webapi.Dom.Element.getBoundingClientRect
+            //   rect["bottom"]
+            // }
+            // |Null|Undefined => 0
+            let y = 0
+
+            // scroll to top
+            switch contentRef.current {
+            | Value(node) => node->scrollToPoint(~x=0, ~y, ~duration=300)
+            | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
+            }
+          }
+        }
+        Promise.resolve()
+      })
+    }
+    None
+  }, (reference, serializedTextualEditionsToDisplay))
+
+  let goToAdjacentChapter = forward => {
+    let newReference = Books.getAdjacentChapter(reference, forward)
+    setReference(newReference)
+  }
+
+  <div>
+    <button
+      ref={ReactDOM.Ref.domRef(buttonRef)}
+      onClick={_ => goToAdjacentChapter(false)}
+      className="chapter-button">
+      {"Previous Chapter"->React.string}
+    </button>
+    <table>
+      <thead>
+        <tr>
+          {textualEditionsToDisplay
+          ->Array.map(t => {
+            <td
+              style={{textAlign: "center", fontWeight: "bold"}}
+              className="verseText"
+              key={t.id->Int.toString}
+              width={(100 / Array.length(textualEditionsToDisplay))->Int.toString ++ "%"}>
+              {t.abbreviation->React.string}
+            </td>
+          })
+          ->React.array}
+        </tr>
+      </thead>
+      <tbody>
+        {chapterData
+        ->Array.mapWithIndex((element, i) => {
+          <tr key={i->Int.toString}>
+            {element
+            ->Array.mapWithIndex((innerElement, j) => {
+              switch (textualEditionsToDisplay[j], innerElement) {
+              | (Some(t), Some(el)) =>
+                <TextObject.VerseCell
+                  key={j->Int.toString}
+                  style={TextObject.getStyleFor(t.abbreviation)}
+                  textObject={el}
+                  textualEditionId={t.id}
+                />
+              | _ => {
+                  "Unknown textualEditionId in ParallelReader"->Console.error
+                  <td key={j->Int.toString} />
+                }
+              }
+            })
+            ->React.array}
+          </tr>
+        })
+        ->React.array}
+      </tbody>
+    </table>
+    <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
+      {"Next Chapter"->React.string}
+    </button>
+  </div>
+}
