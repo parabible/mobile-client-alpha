@@ -67,7 +67,7 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
             }
           }
         }
-      } else if newChapter > bookAtIndex.chapters - (bookAtIndex.hasPrologue ? 1 : 0) {
+      } else if newChapter >= bookAtIndex.chapters - (bookAtIndex.hasPrologue ? 1 : 0) {
         if bookIndex >= books->Array.length {
           // Loop back to Genesis
           {
@@ -78,7 +78,7 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
           switch books->Array.get(bookIndex + 1) {
           | Some(nextBook) => {
               book: nextBook.name,
-              chapter: "1",
+              chapter: nextBook.hasPrologue ? "0" : "1",
             }
           | None => {
               "Something went wrong identifying this book."->Console.error
