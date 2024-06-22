@@ -43,9 +43,7 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
   switch books->Array.get(bookIndex) {
   | Some(bookAtIndex) => {
       let newChapter = reference.chapter->Int.fromString->Option.getOr(1) + (forward ? 1 : -1)
-      if (
-        (newChapter < 1 && !bookAtIndex.hasPrologue) || (newChapter < 0 && bookAtIndex.hasPrologue)
-      ) {
+      if newChapter + (bookAtIndex.hasPrologue ? 1 : 0) < 1 {
         if reference.book === "Genesis" {
           // Loop back to Revelation (we don't loop to apostolic fathers)
           {
@@ -56,7 +54,9 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
           switch books->Array.get(bookIndex - 1) {
           | Some(previousBook) => {
               book: previousBook.name,
-              chapter: "1",
+              chapter: bookAtIndex.hasPrologue
+                ? previousBook.chapters->Int.toString
+                : (previousBook.chapters - 1)->Int.toString,
             }
           | None => {
               "Something went wrong identifying this book."->Console.error
@@ -67,8 +67,8 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
             }
           }
         }
-      } else if newChapter > bookAtIndex.chapters {
-        if bookIndex > books->Array.length - 2 {
+      } else if newChapter > bookAtIndex.chapters - (bookAtIndex.hasPrologue ? 1 : 0) {
+        if bookIndex >= books->Array.length {
           // Loop back to Genesis
           {
             chapter: "1",
