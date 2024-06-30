@@ -35,7 +35,8 @@ let make = (
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
   let (textualEditionsToDisplay, setTextualEditionsToDisplay) = React.useState(_ => [])
 
-  // can't pass an array to useEffect, so serialize it
+  // useEffect can't take arrays and it doesn't correctly memoize objects, so serialize deps
+  let serializedReference = `${reference.book} ${reference.chapter}`
   let serializedTextualEditionsToDisplay =
     enabledTextualEditions->Array.map(m => string_of_int(m.id))->Array.join(",")
 
@@ -90,7 +91,7 @@ let make = (
       })
     }
     None
-  }, (reference, serializedTextualEditionsToDisplay))
+  }, (serializedReference, serializedTextualEditionsToDisplay))
 
   let goToAdjacentChapter = forward => {
     let newReference = Books.getAdjacentChapter(reference, forward)
