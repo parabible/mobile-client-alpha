@@ -140,15 +140,9 @@ let make = () => {
                   )
                 },
               )
-            results.matchingText->Array.length->Console.log
-            columnHasData->Console.log
             let pluckColumns = (row, columns) =>
               row->Array.filterWithIndex((_, i) => columns[i]->Option.getOr(false))
             let newTextualEditionsToDisplay = pluckColumns(enabledTextualEditions, columnHasData)
-            newTextualEditionsToDisplay->Console.log
-            // enabledTextualEditions->Array.filterWithIndex(
-            //   (_, i) => columnHasData[i]->Option.getOr(false),
-            // )
             setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
             setMatchingText(
               _ => Some(results.matchingText->Array.map(row => row->pluckColumns(columnHasData))),
