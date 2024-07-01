@@ -84,16 +84,35 @@ module WordNode = {
   }
 }
 
+module VerseNumber = {
+  @react.component
+  let make = (~verseNumber: option<int>) => {
+    switch verseNumber {
+    | Some(v) => <span className="verseNumber"> {v->Int.toString->React.string} </span>
+    | None => <> </>
+    }
+  }
+}
+
 module VerseCell = {
   @react.component
-  let make = (~textObject: textObject, ~textualEditionId: int, ~style: JsxDOM.style) => {
+  let make = (
+    ~textObject: textObject,
+    ~textualEditionId: int,
+    ~verseNumber: option<int>,
+    ~style: JsxDOM.style,
+  ) => {
     switch textObject.\"type" {
     | "html" =>
-      <td
-        style={style} className="verseText" dangerouslySetInnerHTML={{"__html": textObject.html}}
-      />
+      <td>
+        <VerseNumber verseNumber />
+        <span
+          style={style} className="verseText" dangerouslySetInnerHTML={{"__html": textObject.html}}
+        />
+      </td>
     | "wordArray" =>
       <td style={style} className="verseText">
+        <VerseNumber verseNumber />
         {textObject.wordArray
         ->Array.mapWithIndex((w, i) => {
           <WordNode key={i->Int.toString} wordPart={w} textualEditionId={textualEditionId} />
@@ -109,12 +128,23 @@ module VerseCell = {
 }
 module VerseSpan = {
   @react.component
-  let make = (~textObject: textObject, ~textualEditionId: int, ~style: option<JsxDOM.style>=?) => {
+  let make = (
+    ~textObject: textObject,
+    ~textualEditionId: int,
+    ~verseNumber: option<int>,
+    ~style: option<JsxDOM.style>=?,
+  ) => {
     switch textObject.\"type" {
     | "html" =>
-      <span style={style->Option.getOr({})} dangerouslySetInnerHTML={{"__html": textObject.html}} />
+      <>
+        <VerseNumber verseNumber />
+        <span
+          style={style->Option.getOr({})} dangerouslySetInnerHTML={{"__html": textObject.html}}
+        />
+      </>
     | "wordArray" =>
       <span style={style->Option.getOr({})}>
+        <VerseNumber verseNumber />
         {textObject.wordArray
         ->Array.mapWithIndex((w, i) => {
           <WordNode key={i->Int.toString} wordPart={w} textualEditionId={textualEditionId} />

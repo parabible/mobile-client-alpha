@@ -1,4 +1,5 @@
 %%raw(`import './ParallelReader.css';`)
+
 @send
 external scrollToPoint: (Dom.element, ~x: int, ~y: int, ~duration: int) => unit = "scrollToPoint"
 
@@ -134,6 +135,7 @@ let make = (
                   style={TextObject.getStyleFor(t.abbreviation)}
                   textObject={el}
                   textualEditionId={t.id}
+                  verseNumber={Some(mod(el.rid, 1000))}
                 />
               | _ => {
                   "Unknown textualEditionId in ParallelReader"->Console.error

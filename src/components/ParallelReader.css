@@ -8,3 +8,11 @@
 .chapter-button:hover {
     background-color: #e0e0e0;
 }
+.verseNumber {
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #0078D7;
+    padding: 0 0.5em;
+    top: -0.2rem;
+    position: relative;
+}

@@ -85,7 +85,10 @@ module OrderedResults = {
                   ->Array.mapWithIndex(
                     (v, vi) =>
                       <TextObject.VerseSpan
-                        key={vi->Int.toString} textObject={v} textualEditionId={t.id}
+                        key={vi->Int.toString}
+                        textObject={v}
+                        textualEditionId={t.id}
+                        verseNumber={Some(mod(v.rid, 1000))}
                       />,
                   )
                   ->React.array}
