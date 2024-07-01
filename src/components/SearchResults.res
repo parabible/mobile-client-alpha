@@ -129,13 +129,17 @@ let make = () => {
             setMatchingText(_ => None)
           }
         | Belt.Result.Ok(results) => {
-            let columnHasData = results.matchingText->Array.at(0)->Option.getOr([])->Array.mapWithIndex(
-              (_, i) => {
-                results.matchingText->Array.some(
-                  row => row->Array.get(i)->Option.getOr([])->Array.length > 0,
-                )
-              },
-            )
+            let columnHasData =
+              results.matchingText
+              ->Array.at(0)
+              ->Option.getOr([])
+              ->Array.mapWithIndex(
+                (_, i) => {
+                  results.matchingText->Array.some(
+                    row => row->Array.get(i)->Option.getOr([])->Array.length > 0,
+                  )
+                },
+              )
             results.matchingText->Array.length->Console.log
             columnHasData->Console.log
             let pluckColumns = (row, columns) =>
