@@ -36,7 +36,7 @@ let make = () => {
         </IonButtons>
       </IonToolbar>
     </IonHeader>
-    <IonContent fullscreen={true} ref={ReactDOM.Ref.domRef(ref)}>
+    <IonContent ref={ReactDOM.Ref.domRef(ref)}>
       <ParallelReader reference={reference} contentRef={ref} />
       <SearchResults />
       <WordInfo />
