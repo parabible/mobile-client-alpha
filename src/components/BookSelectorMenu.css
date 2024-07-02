@@ -1,0 +1,4 @@
+.chapter-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 3rem);
+}

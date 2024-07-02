@@ -67,6 +67,7 @@ module IonMenu = {
     ~side: string,
     ~contentId: string,
     ~\"type": string,
+    ~ionDidClose: unit => unit=?,
     ~children: React.element,
   ) => React.element = "IonMenu"
 }
@@ -79,7 +80,8 @@ module IonSearchbar = {
 module IonList = {
   type lines = [#none | #full | #inset]
   @module("@ionic/react") @react.component
-  external make: (~lines: lines=?, ~inset: bool=?, ~children: React.element) => React.element = "IonList"
+  external make: (~lines: lines=?, ~inset: bool=?, ~children: React.element) => React.element =
+    "IonList"
 }
 
 module IonListHeader = {
@@ -140,6 +142,7 @@ module IonLabel = {
 
 type buttonExpand = [#block | #full]
 type buttonFill = [#clear | #outline | #solid]
+type buttonSize = [#small | #default | #large]
 module IonButton = {
   @module("@ionic/react") @react.component
   external make: (
@@ -147,6 +150,7 @@ module IonButton = {
     ~onClick: unit => unit=?,
     ~expand: buttonExpand=?,
     ~shape: string=?,
+    ~size: buttonSize=?,
     ~fill: buttonFill=?,
     ~children: React.element=?,
   ) => React.element = "IonButton"
@@ -163,7 +167,6 @@ module IonModal = {
     ~children: React.element=?,
   ) => React.element = "IonModal"
 }
-
 
 module IonItemGroup = {
   @module("@ionic/react") @react.component

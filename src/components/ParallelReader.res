@@ -24,6 +24,63 @@ let getChapterData = async (
   json->Json.decode(TextObject.decodeTextResult)
 }
 
+module VerseTable = {
+  @react.component
+  let make = (
+    ~textualEditions: array<Zustand.textualEdition>,
+    ~chapterData: array<array<option<TextObject.textObject>>>,
+  ) => {
+    let reference = Zustand.store->Zustand.SomeStore.use(state => state.reference)
+    textualEditions->Array.length === 0
+      ? <div>
+          {`No textual editions are enabled for ${reference.book} ${reference.chapter}`->React.string}
+        </div>
+      : <table>
+          <thead>
+            <tr>
+              {textualEditions
+              ->Array.map(t => {
+                <td
+                  style={{textAlign: "center", fontWeight: "bold"}}
+                  className="verseText"
+                  key={t.id->Int.toString}
+                  width={(100 / Array.length(textualEditions))->Int.toString ++ "%"}>
+                  {t.abbreviation->React.string}
+                </td>
+              })
+              ->React.array}
+            </tr>
+          </thead>
+          <tbody>
+            {chapterData
+            ->Array.mapWithIndex((element, i) => {
+              <tr key={i->Int.toString}>
+                {element
+                ->Array.mapWithIndex((innerElement, j) => {
+                  switch (textualEditions[j], innerElement) {
+                  | (Some(t), Some(el)) =>
+                    <TextObject.VerseCell
+                      key={j->Int.toString}
+                      style={TextObject.getStyleFor(t.abbreviation)}
+                      textObject={el}
+                      textualEditionId={t.id}
+                      verseNumber={Some(mod(el.rid, 1000))}
+                    />
+                  | _ => {
+                      "Unknown textualEditionId in ParallelReader"->Console.error
+                      <td key={j->Int.toString} />
+                    }
+                  }
+                })
+                ->React.array}
+              </tr>
+            })
+            ->React.array}
+          </tbody>
+        </table>
+  }
+}
+
 @react.component
 let make = (
   ~reference: Zustand.reference,
@@ -42,17 +99,23 @@ let make = (
     enabledTextualEditions->Array.map(m => string_of_int(m.id))->Array.join(",")
 
   React.useEffect2(() => {
+    serializedReference->Console.log
+    enabledTextualEditions->Js.Array.length->Console.log
     if enabledTextualEditions->Js.Array.length > 0 {
       let _ = getChapterData(reference, enabledTextualEditions)->Promise.then(data => {
         switch data {
         | Belt.Result.Error(e) => e->Console.error
         | Belt.Result.Ok(data) => {
-            let columnHasData = data->Array.at(0)->Option.getOr([])->Array.mapWithIndex(
-              (_, i) => {
-                let onlyColumnI = data->Array.map(row => row[i]->Option.getOr(None))
-                onlyColumnI->Array.some(t => Option.isSome(t))
-              },
-            )
+            let columnHasData =
+              data
+              ->Array.at(0)
+              ->Option.getOr([])
+              ->Array.mapWithIndex(
+                (_, i) => {
+                  let onlyColumnI = data->Array.map(row => row[i]->Option.getOr(None))
+                  onlyColumnI->Array.some(t => Option.isSome(t))
+                },
+              )
             let newTextualEditionsToDisplay =
               enabledTextualEditions->Array.filterWithIndex(
                 (_, i) => columnHasData[i]->Option.getOr(false),
@@ -106,49 +169,7 @@ let make = (
       className="chapter-button">
       {"Previous Chapter"->React.string}
     </button>
-    <table>
-      <thead>
-        <tr>
-          {textualEditionsToDisplay
-          ->Array.map(t => {
-            <td
-              style={{textAlign: "center", fontWeight: "bold"}}
-              className="verseText"
-              key={t.id->Int.toString}
-              width={(100 / Array.length(textualEditionsToDisplay))->Int.toString ++ "%"}>
-              {t.abbreviation->React.string}
-            </td>
-          })
-          ->React.array}
-        </tr>
-      </thead>
-      <tbody>
-        {chapterData
-        ->Array.mapWithIndex((element, i) => {
-          <tr key={i->Int.toString}>
-            {element
-            ->Array.mapWithIndex((innerElement, j) => {
-              switch (textualEditionsToDisplay[j], innerElement) {
-              | (Some(t), Some(el)) =>
-                <TextObject.VerseCell
-                  key={j->Int.toString}
-                  style={TextObject.getStyleFor(t.abbreviation)}
-                  textObject={el}
-                  textualEditionId={t.id}
-                  verseNumber={Some(mod(el.rid, 1000))}
-                />
-              | _ => {
-                  "Unknown textualEditionId in ParallelReader"->Console.error
-                  <td key={j->Int.toString} />
-                }
-              }
-            })
-            ->React.array}
-          </tr>
-        })
-        ->React.array}
-      </tbody>
-    </table>
+    <VerseTable chapterData={chapterData} textualEditions={textualEditionsToDisplay} />
     <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
       {"Next Chapter"->React.string}
     </button>
