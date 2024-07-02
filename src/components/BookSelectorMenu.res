@@ -9,15 +9,8 @@ let getEventValue = e => {
 
 module ChapterSelector = {
   @react.component
-  let make = (
-    ~setReference: Zustand.reference => unit,
-    ~onBack: unit => unit,
-    ~selectedBook: string,
-  ) => {
+  let make = (~onChapterSelect: int => unit, ~onBack: unit => unit, ~selectedBook: string) => {
     let book = Books.books->Array.find(b => b.name === selectedBook)
-    let onClick = newChapter => {
-      setReference({book: selectedBook, chapter: newChapter})
-    }
     switch book {
     | None => <div> {"Could not find book"->React.string} </div>
     | Some(b) =>
@@ -31,7 +24,7 @@ module ChapterSelector = {
         <div className="chapter-buttons">
           {chapters
           ->Array.map(i => {
-            <IonButton fill={#clear} key={i->Int.toString} onClick={_ => onClick(i->Int.toString)}>
+            <IonButton fill={#clear} key={i->Int.toString} onClick={_ => onChapterSelect(i)}>
               {switch i {
               | 0 => "Pr."->React.string
               | _ => i->Int.toString->React.string
@@ -63,6 +56,19 @@ let make = () => {
     let value = event->getEventValue
     setSearchValue(_ => value)
   }
+  let onChapterSelect = chapter => {
+    switch selectedBook {
+    | Some(book) => {
+        setReference({book, chapter: chapter->Int.toString})
+        IonicFunctions.menuController.close("book-selector")
+      }
+    | _ => {
+        "Could not set reference"->Console.error
+        selectedBook->Console.error
+        chapter->Console.error
+      }
+    }
+  }
 
   let bookSelector = filterIsApplied
     ? <FilteredBookList filterValue={searchValue} selectBook={setSelectedBook} />
@@ -75,7 +81,9 @@ let make = () => {
       | (Book, _) | (Chapter, None) => bookSelector
       | (Chapter, Some(book)) =>
         <ChapterSelector
-          setReference={setReference} selectedBook={book} onBack={_ => setCurrentMode(_ => Book)}
+          onChapterSelect={onChapterSelect}
+          selectedBook={book}
+          onBack={_ => setCurrentMode(_ => Book)}
         />
       }}
     </IonContent>

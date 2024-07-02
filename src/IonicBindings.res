@@ -1,6 +1,6 @@
 module IonicFunctions = {
   @module("@ionic/react") external setupIonicReact: unit => unit = "setupIonicReact"
-  type menuController = {\"open": string => unit}
+  type menuController = {\"open": string => unit, \"close": string => unit}
   @module("@ionic/core/components") external menuController: menuController = "menuController"
 }
 
