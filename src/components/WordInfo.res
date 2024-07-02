@@ -83,8 +83,8 @@ let make = () => {
   <IonModal
     className="word-info"
     isOpen={showWordInfo}
-    initialBreakpoint={0.15}
-    breakpoints={[0., 0.15, 1.]}
+    initialBreakpoint={0.11}
+    breakpoints={[0., 0.11, 1.]}
     onDidDismiss={hideWordInfo}>
     <IonContent className="ion-padding">
       <div
@@ -92,7 +92,7 @@ let make = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          fontSize: "2rem",
+          fontSize: "1.3rem",
           fontFamily: "SBL BibLit",
           padding: "0 1rem 0.8rem",
         }}>
