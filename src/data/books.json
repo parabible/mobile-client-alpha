@@ -113,7 +113,7 @@
 	{"name": "Barnabas", "chapters": 21, "abbreviation": "Barn.", "hasPrologue": false },
 	{"name": "1 Clement", "chapters": 66, "abbreviation": "1 Clem.", "hasPrologue": true },
 	{"name": "2 Clement", "chapters": 20, "abbreviation": "2 Clem.", "hasPrologue": false },
-	{"name": "Didache", "chapters": 17, "abbreviation": "Did.", "hasPrologue": false },
+	{"name": "Didache", "chapters": 17, "abbreviation": "Did.", "hasPrologue": true },
 	{"name": "Diognetus", "chapters": 13, "abbreviation": "Diogn.", "hasPrologue": false },
 	null,
 	{"name": "Ign. Eph.", "chapters": 22, "abbreviation": "Ign. Eph.", "hasPrologue": true },
