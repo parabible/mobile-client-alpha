@@ -32,7 +32,10 @@ module ChapterSelector = {
           {chapters
           ->Array.map(i => {
             <IonButton fill={#clear} key={i->Int.toString} onClick={_ => onClick(i->Int.toString)}>
-              {i->Int.toString->React.string}
+              {switch i {
+              | 0 => "Pr."->React.string
+              | _ => i->Int.toString->React.string
+              }}
             </IonButton>
           })
           ->React.array}
