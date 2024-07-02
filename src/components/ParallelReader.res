@@ -35,7 +35,7 @@ module VerseTable = {
       ? <div>
           {`No textual editions are enabled for ${reference.book} ${reference.chapter}`->React.string}
         </div>
-      : <table>
+      : <table className="verse-table">
           <thead>
             <tr>
               {textualEditions
