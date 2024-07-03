@@ -1,5 +1,7 @@
 open IonicBindings
 
+let pageSizeConstant = 10
+
 type teMatch = array<TextObject.textObject>
 
 type resultRow = array<teMatch>
@@ -39,11 +41,11 @@ let decodeTermSearchResult = Json.Decode.object(field => {
   warmWords: field.required("warmWords", decodeWarmWords),
 })
 
-let getUrl = (searchLexeme, textualEditionAbbreviations) =>
-  `https://dev.parabible.com/api/v2/termSearch?t.0.data.lexeme=${searchLexeme}&modules=${textualEditionAbbreviations}&treeNodeType=verse&pageNumber=0&pageSize=10`
+let getUrl = (searchLexeme, textualEditionAbbreviations, pageNumber, pageSize) =>
+  `https://dev.parabible.com/api/v2/termSearch?t.0.data.lexeme=${searchLexeme}&modules=${textualEditionAbbreviations}&treeNodeType=verse&page=${pageNumber->Int.toString}&pageSize=${pageSize->Int.toString}`
 
-let getSearchResults = async (searchLexeme, textualEditionAbbreviations) => {
-  let url = getUrl(searchLexeme, textualEditionAbbreviations)
+let getSearchResults = async (searchLexeme, textualEditionAbbreviations, pageNumber, pageSize) => {
+  let url = getUrl(searchLexeme, textualEditionAbbreviations, pageNumber, pageSize)
   let response = await Fetch.fetch(url, {method: #GET})
   let json = await response->Fetch.Response.json
   json->Json.decode(decodeTermSearchResult)
@@ -106,7 +108,9 @@ module OrderedResults = {
 
 @react.component
 let make = () => {
+  let (resultsCount, setResultsCount) = React.useState(_ => 0)
   let (matchingText, setMatchingText) = React.useState(_ => None)
+  let (pageNumber, setPageNumber) = React.useState(_ => 0)
   let searchLexeme = Zustand.store->Zustand.SomeStore.use(state => state.searchLexeme)
   let textualEditions = Zustand.store->Zustand.SomeStore.use(state => state.textualEditions)
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
@@ -120,9 +124,20 @@ let make = () => {
     Zustand.store->Zustand.SomeStore.use(state => state.setShowSearchResults)
   let hideSearchResults = () => setShowSearchResults(false)
 
-  React.useEffect2(() => {
+  React.useEffect(() => {
+    setPageNumber(_ => 0)
+    None
+  }, [searchLexeme])
+
+  React.useEffect3(() => {
+    // make sure that only pagenumber has changed...
     if searchLexeme != "" && textualEditionAbbreviations != "" {
-      let _ = getSearchResults(searchLexeme, textualEditionAbbreviations)->Promise.then(results => {
+      let _ = getSearchResults(
+        searchLexeme,
+        textualEditionAbbreviations,
+        pageNumber,
+        pageSizeConstant,
+      )->Promise.then(results => {
         switch results {
         | Belt.Result.Error(e) => {
             e->Console.error
@@ -143,6 +158,7 @@ let make = () => {
             let pluckColumns = (row, columns) =>
               row->Array.filterWithIndex((_, i) => columns[i]->Option.getOr(false))
             let newTextualEditionsToDisplay = pluckColumns(enabledTextualEditions, columnHasData)
+            setResultsCount(_ => results.count)
             setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
             setMatchingText(
               _ => Some(results.matchingText->Array.map(row => row->pluckColumns(columnHasData))),
@@ -153,14 +169,14 @@ let make = () => {
       })
     }
     None
-  }, (searchLexeme, textualEditionAbbreviations))
+  }, (searchLexeme, textualEditionAbbreviations, pageNumber))
 
   <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults}>
     <IonHeader>
       <IonToolbar>
         <IonTitle> {"Search Results"->React.string} </IonTitle>
         <IonButtons slot="end">
-          <IonButton shape="round" onClick={() => hideSearchResults()}>
+          <IonButton shape=#round onClick={() => hideSearchResults()}>
             <IonIcon slot="icon-only" icon={IonIcons.close} />
           </IonButton>
         </IonButtons>
@@ -170,7 +186,19 @@ let make = () => {
       {switch matchingText {
       | None => "No results"->React.string
       | Some(matchingText) =>
-        <OrderedResults results={matchingText} visibleModules={textualEditionsToDisplay} />
+        <>
+          <Pagination
+            totalPages={resultsCount / pageSizeConstant}
+            currentPage={pageNumber}
+            setPageNumber={i => setPageNumber(_ => i)}
+          />
+          <OrderedResults results={matchingText} visibleModules={textualEditionsToDisplay} />
+          <Pagination
+            totalPages={resultsCount / pageSizeConstant}
+            currentPage={pageNumber}
+            setPageNumber={i => setPageNumber(_ => i)}
+          />
+        </>
       }}
     </IonContent>
   </IonModal>

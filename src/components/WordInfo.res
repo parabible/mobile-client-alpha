@@ -98,7 +98,7 @@ let make = () => {
         }}>
         <b> {lexeme->React.string} </b>
         <b> {gloss->React.string} </b>
-        <IonButton shape="round" onClick={() => doSearch(lexeme)}>
+        <IonButton shape=#round onClick={() => doSearch(lexeme)}>
           <IonIcon slot="icon-only" icon={IonIcons.search} />
         </IonButton>
       </div>

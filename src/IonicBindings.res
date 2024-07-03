@@ -1,6 +1,6 @@
 module IonicFunctions = {
   @module("@ionic/react") external setupIonicReact: unit => unit = "setupIonicReact"
-  type menuController = {\"open": string => unit, \"close": string => unit}
+  type menuController = {\"open": string => unit, close: string => unit}
   @module("@ionic/core/components") external menuController: menuController = "menuController"
 }
 
@@ -143,13 +143,26 @@ module IonLabel = {
 type buttonExpand = [#block | #full]
 type buttonFill = [#clear | #outline | #solid]
 type buttonSize = [#small | #default | #large]
+type buttonColor = [
+  | #primary
+  | #secondary
+  | #tertiary
+  | #success
+  | #warning
+  | #danger
+  | #light
+  | #medium
+  | #dark
+]
+type buttonShape = [#round]
 module IonButton = {
   @module("@ionic/react") @react.component
   external make: (
-    ~color: string=?,
+    ~color: buttonColor=?,
+    ~disabled: bool=?,
     ~onClick: unit => unit=?,
     ~expand: buttonExpand=?,
-    ~shape: string=?,
+    ~shape: buttonShape=?,
     ~size: buttonSize=?,
     ~fill: buttonFill=?,
     ~children: React.element=?,
@@ -184,4 +197,6 @@ module IonIcons = {
   @module("ionicons/icons") external apps: React.element = "apps"
   @module("ionicons/icons") external search: React.element = "search"
   @module("ionicons/icons") external close: React.element = "close"
+  @module("ionicons/icons") external chevronBackOutline: React.element = "chevronBackOutline"
+  @module("ionicons/icons") external chevronForwardOutline: React.element = "chevronForwardOutline"
 }

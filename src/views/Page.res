@@ -19,18 +19,18 @@ let make = () => {
       <IonToolbar>
         <IonButtons slot="start">
           <IonButton
-            shape="round" onClick={() => IonicFunctions.menuController.\"open"("book-selector")}>
+            shape=#round onClick={() => IonicFunctions.menuController.\"open"("book-selector")}>
             <IonIcon slot="icon-only" icon={IonIcons.library} />
           </IonButton>
         </IonButtons>
         <IonTitle> {`${reference.book} ${reference.chapter}`->React.string} </IonTitle>
         <IonButtons slot="end">
           <IonButton
-            shape="round" onClick={() => IonicFunctions.menuController.\"open"("textualEditions")}>
+            shape=#round onClick={() => IonicFunctions.menuController.\"open"("textualEditions")}>
             <IonIcon slot="icon-only" icon={IonIcons.apps} />
           </IonButton>
           // <IonButton
-          //   shape="round" onClick={() => IonicFunctions.menuController.\"open"("settings")}>
+          //   shape=#round onClick={() => IonicFunctions.menuController.\"open"("settings")}>
           //   <IonIcon slot="icon-only" icon={IonIcons.settings} />
           // </IonButton>
         </IonButtons>
