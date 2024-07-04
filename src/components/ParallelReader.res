@@ -96,8 +96,6 @@ let make = (
     enabledTextualEditions->Array.map(m => string_of_int(m.id))->Array.join(",")
 
   React.useEffect2(() => {
-    serializedReference->Console.log
-    enabledTextualEditions->Js.Array.length->Console.log
     if enabledTextualEditions->Js.Array.length > 0 {
       let _ = getChapterData(reference, enabledTextualEditions)->Promise.then(data => {
         switch data {
