@@ -11,7 +11,7 @@
 .verseNumber {
     font-size: 0.5rem;
     font-weight: bold;
-    color: #0078D7;
+    color: var(--ion-color-primary);
     padding: 0 0.5em;
     top: -0.4rem;
     position: relative;

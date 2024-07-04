@@ -1,3 +1,5 @@
+%%raw(`import './SearchResults.css';`)
+
 open IonicBindings
 
 let pageSizeConstant = 10
@@ -51,6 +53,12 @@ let getSearchResults = async (searchLexeme, textualEditionAbbreviations, pageNum
   json->Json.decode(decodeTermSearchResult)
 }
 
+let getFirstRidForRow = (row: resultRow) =>
+  switch row->Array.at(0)->Option.getOr([])->Array.at(0) {
+  | Some(textObject) => textObject.rid
+  | None => 0
+  }
+
 module OrderedResults = {
   @react.component
   let make = (~results, ~visibleModules: array<Zustand.textualEdition>) => {
@@ -72,8 +80,13 @@ module OrderedResults = {
       </thead>
       <tbody>
         {results
-        ->Array.mapWithIndex((row, ri) =>
-          <tr key={ri->Int.toString}>
+        ->Array.mapWithIndex((row, ri) => <>
+          <tr key={ri->Int.toString ++ "a"}>
+            <td colSpan={row->Array.length} className="search-result-reference">
+              {row->getFirstRidForRow->Books.ridToRef->React.string}
+            </td>
+          </tr>
+          <tr key={ri->Int.toString ++ "b"}>
             {row
             ->Array.mapWithIndex((textualEditionResult, ti) => {
               switch ti->getTextualEditionByIndex {
@@ -99,7 +112,7 @@ module OrderedResults = {
             })
             ->React.array}
           </tr>
-        )
+        </>)
         ->React.array}
       </tbody>
     </table>
@@ -108,6 +121,7 @@ module OrderedResults = {
 
 @react.component
 let make = () => {
+  let ref = React.useRef(Nullable.null)
   let (resultsCount, setResultsCount) = React.useState(_ => 0)
   let (matchingText, setMatchingText) = React.useState(_ => None)
   let (pageNumber, setPageNumber) = React.useState(_ => 0)
@@ -163,6 +177,12 @@ let make = () => {
             setMatchingText(
               _ => Some(results.matchingText->Array.map(row => row->pluckColumns(columnHasData))),
             )
+
+            // scroll to top
+            switch ref.current {
+            | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y=0, ~duration=300)
+            | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
+            }
           }
         }
         Promise.resolve()
@@ -170,6 +190,8 @@ let make = () => {
     }
     None
   }, (searchLexeme, textualEditionAbbreviations, pageNumber))
+
+  let totalPages = (resultsCount->Int.toFloat /. pageSizeConstant->Int.toFloat)->Js.Math.ceil_int - 1
 
   <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults}>
     <IonHeader>
@@ -182,19 +204,19 @@ let make = () => {
         </IonButtons>
       </IonToolbar>
     </IonHeader>
-    <IonContent className="ion-padding" scrollX={true}>
+    <IonContent ref={ReactDOM.Ref.domRef(ref)} className="ion-padding" scrollX={true}>
       {switch matchingText {
       | None => "No results"->React.string
       | Some(matchingText) =>
         <>
           <Pagination
-            totalPages={resultsCount / pageSizeConstant}
+            totalPages={totalPages}
             currentPage={pageNumber}
             setPageNumber={i => setPageNumber(_ => i)}
           />
           <OrderedResults results={matchingText} visibleModules={textualEditionsToDisplay} />
           <Pagination
-            totalPages={resultsCount / pageSizeConstant}
+            totalPages={totalPages}
             currentPage={pageNumber}
             setPageNumber={i => setPageNumber(_ => i)}
           />

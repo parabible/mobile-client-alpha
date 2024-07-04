@@ -1,8 +1,5 @@
 %%raw(`import './ParallelReader.css';`)
 
-@send
-external scrollToPoint: (Dom.element, ~x: int, ~y: int, ~duration: int) => unit = "scrollToPoint"
-
 let baseUrl = "https://dev.parabible.com/api/v2"
 
 let apiEndpoint = baseUrl ++ "/text"
@@ -146,7 +143,7 @@ let make = (
 
             // scroll to top
             switch contentRef.current {
-            | Value(node) => node->scrollToPoint(~x=0, ~y, ~duration=300)
+            | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y, ~duration=300)
             | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
             }
           }

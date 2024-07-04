@@ -27,13 +27,15 @@ let booksList = booksFile->Json.decode(
   }),
 )
 
-let books = switch booksList {
-| Belt.Result.Ok(b) => b.default->Array.filterMap(b => b)
+let allBooks = switch booksList {
+| Belt.Result.Ok(b) => b.default
 | Belt.Result.Error(e) => {
     e->Console.error
     []
   }
 }
+
+let books = allBooks->Array.filterMap(b => b)
 
 let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
   reference: Zustand.reference,
@@ -98,4 +100,22 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
       chapter: "1",
     }
   }
+}
+
+let ridToRef = rid => {
+  let book = rid / 1000000 - 1
+  let chapter = mod(rid / 1000, 1000)
+  let verse = mod(rid, 1000)
+
+  let bookObj = allBooks
+    ->Array.get(book)
+    ->Option.getOr(None)
+    ->Option.getOr({
+      name: "Unknown",
+      abbreviation: "Unk",
+      chapters: 0,
+      hasPrologue: false,
+    })
+    
+  bookObj.name ++ " " ++ chapter->Int.toString ++ ":" ++ verse->Int.toString
 }

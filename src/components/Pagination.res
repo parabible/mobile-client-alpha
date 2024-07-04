@@ -34,8 +34,6 @@ let make = (~totalPages, ~currentPage, ~setPageNumber) => {
     <IonButton
       disabled={0 == currentPage}
       shape={#round}
-      size={#small}
-      color={#medium}
       fill={#clear}
       onClick={_ => setPageNumber(0)}>
       <IonIcon slot="icon-only" src=FeatherIcons.chevronsLeft />
@@ -43,8 +41,6 @@ let make = (~totalPages, ~currentPage, ~setPageNumber) => {
     <IonButton
       disabled={0 == currentPage}
       shape={#round}
-      size={#small}
-      color={#medium}
       fill={#clear}
       onClick={_ => setPageNumber(currentPage - 1)}>
       <IonIcon slot="icon-only" src=FeatherIcons.chevronLeft />
@@ -53,8 +49,6 @@ let make = (~totalPages, ~currentPage, ~setPageNumber) => {
     <IonButton
       disabled={totalPages == currentPage}
       shape={#round}
-      size={#small}
-      color={#medium}
       fill={#clear}
       onClick={_ => setPageNumber(currentPage + 1)}>
       <IonIcon slot="icon-only" src=FeatherIcons.chevronRight />
@@ -62,8 +56,6 @@ let make = (~totalPages, ~currentPage, ~setPageNumber) => {
     <IonButton
       disabled={totalPages == currentPage}
       shape={#round}
-      size={#small}
-      color={#medium}
       fill={#clear}
       onClick={_ => setPageNumber(totalPages)}>
       <IonIcon slot="icon-only" src=FeatherIcons.chevronsRight />

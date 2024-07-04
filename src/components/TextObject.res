@@ -69,7 +69,7 @@ module WordNode = {
     let style: JsxDOM.style = if (
       selectedWord.id == wordPart.wid && selectedWord.moduleId == textualEditionId
     ) {
-      {color: "#0078D7"}
+      {color: "var(--ion-color-primary)"}
     } else {
       {}
     }
