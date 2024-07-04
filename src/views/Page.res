@@ -23,7 +23,7 @@ let make = () => {
             <IonIcon slot="icon-only" icon={IonIcons.library} />
           </IonButton>
         </IonButtons>
-        <IonTitle> {`${reference.book} ${reference.chapter}`->React.string} </IonTitle>
+        <IonTitle> {`${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string} </IonTitle>
         <IonButtons slot="end">
           <IonButton
             shape=#round onClick={() => IonicFunctions.menuController.\"open"("textualEditions")}>

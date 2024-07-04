@@ -102,12 +102,21 @@ let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
   }
 }
 
+let getBookAbbreviation = book => {
+  let bookObj = books->Array.find(b => b.name === book)
+  switch bookObj {
+  | Some(b) => b.abbreviation
+  | None => book
+  }
+}
+
 let ridToRef = rid => {
   let book = rid / 1000000 - 1
   let chapter = mod(rid / 1000, 1000)
   let verse = mod(rid, 1000)
 
-  let bookObj = allBooks
+  let bookObj =
+    allBooks
     ->Array.get(book)
     ->Option.getOr(None)
     ->Option.getOr({
@@ -116,6 +125,6 @@ let ridToRef = rid => {
       chapters: 0,
       hasPrologue: false,
     })
-    
+
   bookObj.name ++ " " ++ chapter->Int.toString ++ ":" ++ verse->Int.toString
 }
