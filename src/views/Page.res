@@ -12,7 +12,11 @@ let make = () => {
     }
     r
   })
-  // let setReference = Zustand.store->Zustand.SomeStore.use(state => state.setReference)
+  let setReference = Zustand.store->Zustand.SomeStore.use(state => state.setReference)
+  let goToAdjacentChapter = forward => {
+    let newReference = Books.getAdjacentChapter(reference, forward)
+    setReference(newReference)
+  }
 
   <IonPage>
     <IonHeader>
@@ -22,9 +26,19 @@ let make = () => {
             shape=#round onClick={() => IonicFunctions.menuController.\"open"("book-selector")}>
             <IonIcon slot="icon-only" icon={IonIcons.library} />
           </IonButton>
+          <IonButton shape=#round onClick={() => goToAdjacentChapter(false)}>
+            <IonIcon slot="icon-only" src=FeatherIcons.chevronLeft />
+          </IonButton>
         </IonButtons>
-        <IonTitle> {`${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string} </IonTitle>
+        <IonTitle>
+          <div style={{textAlign: "center"}}>
+            {`${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string}
+          </div>
+        </IonTitle>
         <IonButtons slot="end">
+          <IonButton shape=#round onClick={() => goToAdjacentChapter(true)}>
+            <IonIcon slot="icon-only" src=FeatherIcons.chevronRight />
+          </IonButton>
           <IonButton
             shape=#round onClick={() => IonicFunctions.menuController.\"open"("textualEditions")}>
             <IonIcon slot="icon-only" icon={IonIcons.apps} />
