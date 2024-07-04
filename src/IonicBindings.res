@@ -132,7 +132,8 @@ module IonButtons = {
 
 module IonIcon = {
   @module("@ionic/react") @react.component
-  external make: (~slot: string, ~icon: React.element) => React.element = "IonIcon"
+  external make: (~slot: string=?, ~icon: React.element=?, ~src: string=?) => React.element =
+    "IonIcon"
 }
 
 module IonLabel = {
@@ -198,5 +199,10 @@ module IonIcons = {
   @module("ionicons/icons") external search: React.element = "search"
   @module("ionicons/icons") external close: React.element = "close"
   @module("ionicons/icons") external chevronBackOutline: React.element = "chevronBackOutline"
-  @module("ionicons/icons") external chevronForwardOutline: React.element = "chevronForwardOutline"
+  @module("ionicons/icons") external chevronForward: React.element = "chevronForward"
+  @module("ionicons/icons") external chevronBack: React.element = "chevronBack"
+  @module("ionicons/icons") external caretForward: React.element = "caretForward"
+  @module("ionicons/icons") external caretBack: React.element = "caretBack"
+  @module("ionicons/icons") external playForward: React.element = "playForward"
+  @module("ionicons/icons") external playBack: React.element = "playBack"
 }
