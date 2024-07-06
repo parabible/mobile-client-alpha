@@ -35,33 +35,66 @@ let getWordInfo = async (wordId, textualEditionId) => {
   json->Json.decode(wordInfoDecoder)
 }
 
+let wordInfoToDataPoint: wordInfoEntry => Zustand.searchTermDataPoint = wi => {
+  key: wi.key,
+  value: wi.value,
+}
+
+type mode =
+  | View
+  | CreateSearchTerm
+
+module WordInfoItem = {
+  @react.component
+  let make = (~heading, ~subheading) => {
+    <IonLabel>
+      <h2> {heading->React.string} </h2>
+      <p> {subheading->React.string} </p>
+    </IonLabel>
+  }
+}
+
+module CheckableWordInfoItem = {
+  let onCheckboxChange = e => {
+    let target = e->JsxEvent.Form.target
+    (target["checked"]: bool)
+  }
+  @react.component
+  let make = (~heading, ~subheading, ~isChecked, ~onCheck) => {
+    <IonCheckbox checked={isChecked} onIonChange={e => onCheck(onCheckboxChange(e))}>
+      <WordInfoItem heading subheading />
+    </IonCheckbox>
+  }
+}
+
 @react.component
 let make = () => {
   let (currentWordInfo, setCurrentWordInfo) = React.useState(_ => [])
+  let (checkedDataPoints, setCheckedDataPoints) = React.useState(_ => [])
+  let (currentMode, setCurrentMode) = React.useState(_ => View)
   let selectedWord = Zustand.store->Zustand.SomeStore.use(state => state.selectedWord)
   let showWordInfo = Zustand.store->Zustand.SomeStore.use(state => state.showWordInfo)
   let setShowWordInfo = Zustand.store->Zustand.SomeStore.use(state => {
     state.setShowWordInfo
   })
-  let hideWordInfo = () => setShowWordInfo(false)
+  let hideWordInfo = () => {
+    setCurrentMode(_ => View)
+    setShowWordInfo(false)
+  }
   let setShowSearchResults = Zustand.store->Zustand.SomeStore.use(state => {
     state.setShowSearchResults
   })
-  let setSearchLexeme = Zustand.store->Zustand.SomeStore.use(state => state.setSearchLexeme)
-  let doSearch = lexeme => {
-    setSearchLexeme(lexeme)
-    setShowSearchResults(true)
-    // Ionic creates and removes dom elements. If we don't hideWordInfo,
-    // the modal only shows beneath the search results.
-    hideWordInfo()
-  }
+  let addSearchTerm = Zustand.store->Zustand.SomeStore.use(state => state.addSearchTerm)
 
   React.useEffect(() => {
     if showWordInfo {
       let _ = getWordInfo(selectedWord.id, selectedWord.moduleId)->Promise.then(data => {
         switch data {
         | Belt.Result.Error(e) => e->Console.error
-        | Belt.Result.Ok(result) => setCurrentWordInfo(_ => result.data)
+        | Belt.Result.Ok(result) => {
+            setCheckedDataPoints(_ => result.data->Array.map(_ => false))
+            setCurrentWordInfo(_ => result.data)
+          }
         }
         Promise.resolve()
       })
@@ -79,6 +112,16 @@ let make = () => {
     ->Array.find(wi => wi.key === "gloss")
     ->Option.map(wi => wi.value)
     ->Option.getOr("")
+  let addSearch = () => {
+    addSearchTerm([
+      {
+        key: "lexeme",
+        value: lexeme,
+      },
+    ])
+    setShowSearchResults(true)
+    hideWordInfo()
+  }
 
   <IonModal
     className="word-info"
@@ -98,22 +141,49 @@ let make = () => {
         }}>
         <b> {lexeme->React.string} </b>
         <b> {gloss->React.string} </b>
-        <IonButton shape=#round onClick={() => doSearch(lexeme)}>
-          <IonIcon slot="icon-only" icon={IonIcons.search} />
-        </IonButton>
+          <IonButton shape=#round onClick={addSearch}>
+            <IonIcon slot="icon-only" icon={IonIcons.search} />
+          </IonButton>
       </div>
       <IonList>
         {currentWordInfo
-        ->Array.map(wi =>
+        ->Array.mapWithIndex((wi, i) =>
           <IonItem key={wi.key}>
-            <IonLabel>
-              <h2> {Features.getFeatureValue(wi.key, wi.value)->React.string} </h2>
-              <p> {Features.getFeatureName(wi.key)->React.string} </p>
-            </IonLabel>
+            {
+              let heading = Features.getFeatureValue(wi.key, wi.value)
+              let subheading = Features.getFeatureName(wi.key)
+              switch currentMode {
+              | View => <WordInfoItem heading subheading />
+              | CreateSearchTerm =>
+                <CheckableWordInfoItem
+                  heading
+                  subheading
+                  isChecked={checkedDataPoints->Array.get(i)->Option.getOr(false)}
+                  onCheck={newVal => {
+                    setCheckedDataPoints(oldDataPoints => {
+                      oldDataPoints->Array.mapWithIndex((val, j) => i === j ? newVal : val)
+                    })
+                  }}
+                />
+              }
+            }
           </IonItem>
         )
         ->React.array}
       </IonList>
+      {switch currentMode {
+      | View =>
+        <IonButton expand={#full} onClick={_ => setCurrentMode(_ => CreateSearchTerm)}>
+          {"Create Custom Search Term"->React.string}
+        </IonButton>
+      | CreateSearchTerm =>
+        <div style={{display: "grid", grid: "auto-flow / 1fr 1fr"}}>
+            <IonButton expand={#full} onClick={addSearch}> {"Search"->React.string} </IonButton>
+          <IonButton expand={#full} color={#light} onClick={_ => setCurrentMode(_ => View)}>
+            {"Cancel"->React.string}
+          </IonButton>
+        </div>
+      }}
     </IonContent>
   </IonModal>
 }

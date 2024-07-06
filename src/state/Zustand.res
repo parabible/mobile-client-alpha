@@ -21,12 +21,16 @@ module Zustand = {
 type selectedWord = {id: int, moduleId: int}
 type reference = {book: string, chapter: string}
 type textualEdition = {id: int, abbreviation: string, visible: bool}
+type searchTermDataPoint = {key: string, value: string}
+type searchTerm = array<searchTermDataPoint>
 module AppStore = {
   type state = {
     selectedWord: selectedWord,
     setSelectedWord: selectedWord => unit,
-    searchLexeme: string,
-    setSearchLexeme: string => unit,
+    searchTerms: array<searchTerm>,
+    setSearchTerms: array<searchTerm> => unit,
+    addSearchTerm: searchTerm => unit,
+    deleteSearchTerm: int => unit,
     reference: reference,
     setReference: (reference) => unit,
     showWordInfo: bool,
@@ -47,12 +51,23 @@ let store = SomeStore.create(set => {
       ...state,
       selectedWord,
     }),
-  searchLexeme: "",
-  setSearchLexeme: lexeme =>
+  searchTerms: [],
+  setSearchTerms: newSearchTerms =>
     set(state => {
       ...state,
-      searchLexeme: lexeme,
+      searchTerms: newSearchTerms,
     }),
+  addSearchTerm: searchTermDataPoint =>
+    set(state => {
+      ...state,
+      searchTerms: [...state.searchTerms, searchTermDataPoint],
+    }),
+    deleteSearchTerm: index => {
+      set(state => {
+        ...state,
+        searchTerms: state.searchTerms->Array.filterWithIndex((_, i) => i !== index),
+      })
+    },
   reference: {book: "Genesis", chapter: "1"},
   setReference: (reference) =>
     set(state => {
@@ -78,3 +93,14 @@ let store = SomeStore.create(set => {
       textualEditions: editions,
     }),
 })
+
+let serializeSearchTerms = (searchTerms: array<searchTerm>) =>
+  searchTerms
+  ->Array.mapWithIndex((term, i) =>
+    term
+    ->Array.map(datapoint =>
+      ["t", i->Int.toString, "data", datapoint.key ++ "=" ++ datapoint.value]->Array.join(".")
+    )
+    ->Array.join("&")
+  )
+  ->Array.join("&")

@@ -1,3 +1,15 @@
+type ionColor = [
+  | #primary
+  | #secondary
+  | #tertiary
+  | #success
+  | #warning
+  | #danger
+  | #light
+  | #medium
+  | #dark
+]
+
 module IonicFunctions = {
   @module("@ionic/react") external setupIonicReact: unit => unit = "setupIonicReact"
   type menuController = {\"open": string => unit, close: string => unit}
@@ -106,17 +118,23 @@ module IonReorderGroup = {
 
 module IonItem = {
   @module("@ionic/react") @react.component
-  external make: (~children: React.element) => React.element = "IonItem"
+  external make: (
+    ~id: string=?,
+    ~onClick: ReactEvent.Mouse.t => unit=?,
+    ~button: bool=?,
+    ~detail: bool=?,
+    ~children: React.element,
+  ) => React.element = "IonItem"
 }
 
 module IonCheckbox = {
   @module("@ionic/react") @react.component
   external make: (
-    ~labelPlacement: [#start | #end],
-    ~justify: string,
-    ~checked: bool,
-    ~onIonChange: unit => unit,
-    ~children: React.element,
+    ~labelPlacement: [#start | #end]=?,
+    ~justify: string=?,
+    ~checked: bool=?,
+    ~onIonChange: ReactEvent.Form.t => unit=?,
+    ~children: React.element=?,
   ) => React.element = "IonCheckbox"
 }
 
@@ -144,22 +162,12 @@ module IonLabel = {
 type buttonExpand = [#block | #full]
 type buttonFill = [#clear | #outline | #solid]
 type buttonSize = [#small | #default | #large]
-type buttonColor = [
-  | #primary
-  | #secondary
-  | #tertiary
-  | #success
-  | #warning
-  | #danger
-  | #light
-  | #medium
-  | #dark
-]
 type buttonShape = [#round]
 module IonButton = {
   @module("@ionic/react") @react.component
   external make: (
-    ~color: buttonColor=?,
+    ~id: string=?,
+    ~color: ionColor=?,
     ~disabled: bool=?,
     ~onClick: unit => unit=?,
     ~expand: buttonExpand=?,
@@ -192,6 +200,73 @@ module IonItemDivider = {
   external make: (~children: React.element) => React.element = "IonItemDivider"
 }
 
+type alertButtonInterface = {
+  text: string,
+  role?: string,
+  id?: string,
+  handler?: unit => unit,
+}
+
+type eventDetail = {role: string}
+type alertDismissEvent = {detail: eventDetail}
+module IonAlert = {
+  @module("@ionic/react") @react.component
+  external make: (
+    ~trigger: string=?,
+    ~header: string=?,
+    ~subHeader: string=?,
+    ~message: string=?,
+    ~buttons: array<alertButtonInterface>=?,
+    ~onDidDismiss: alertDismissEvent => unit=?,
+  ) => React.element = "IonAlert"
+}
+
+module IonPopover = {
+  @module("@ionic/react") @react.component
+  external make: (
+    ~trigger: string,
+    ~dismissOnSelect: bool=?,
+    ~side: string=?,
+    ~children: React.element,
+  ) => React.element = "IonPopover"
+}
+
+module IonSpinner = {
+  type spinnerName = [
+    | #bubbles
+    | #circles
+    | #circular
+    | #crescent
+    | #dots
+    | #lines
+    | #linesSharp
+    | #linesSharpSmall
+    | #linesSmall
+  ]
+  @module("@ionic/react") @react.component
+  external make: (~name: spinnerName=?, ~color: ionColor=?) => React.element = "IonSpinner"
+}
+
+module IonItemOption = {
+  @module("@ionic/react") @react.component
+  external make: (~color: ionColor=?, ~onClick: unit => unit=?, ~expandable: bool=?, ~children: React.element) => React.element =
+    "IonItemOption"
+}
+
+module IonItemOptions = {
+  type optionsSlot = [#start | #end]
+  @module("@ionic/react") @react.component
+  external make: (~side: optionsSlot=?, ~children: React.element) => React.element =
+    "IonItemOptions"
+}
+
+module IonItemSliding = {
+  @module("@ionic/react") @react.component
+  external make: ( ~children: React.element) => React.element =
+    "IonItemSliding"
+}
+
+
 module IonIcons = {
   @module("ionicons/icons") external library: React.element = "library"
   @module("ionicons/icons") external settings: React.element = "settings"
@@ -205,4 +280,10 @@ module IonIcons = {
   @module("ionicons/icons") external caretBack: React.element = "caretBack"
   @module("ionicons/icons") external playForward: React.element = "playForward"
   @module("ionicons/icons") external playBack: React.element = "playBack"
+  @module("ionicons/icons") external ellipsisVertical: React.element = "ellipsisVertical"
+  @module("ionicons/icons") external filter: React.element = "filter"
+  @module("ionicons/icons") external codeWorking: React.element = "codeWorking"
+  @module("ionicons/icons") external trash: React.element = "trash"
+  @module("ionicons/icons") external options: React.element = "options"
+  @module("ionicons/icons") external power: React.element = "power"
 }

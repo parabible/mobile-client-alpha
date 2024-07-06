@@ -97,7 +97,7 @@ let make = () => {
                 labelPlacement=#end
                 justify="start"
                 checked={textualEdition.visible}
-                onIonChange={() => toggleTextualEdition(textualEdition.id)}>
+                onIonChange={_ => toggleTextualEdition(textualEdition.id)}>
                 {textualEdition.abbreviation->React.string}
               </IonCheckbox>
               <IonReorder slot="end" />
