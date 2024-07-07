@@ -11,10 +11,9 @@ td.verseText {
   padding: 0.5em;
 }
 
-button.word {
-  all: unset;
+.word {
   cursor: pointer;
 }
-button.word:hover {
+.word:hover {
   color: #005a9e
 }

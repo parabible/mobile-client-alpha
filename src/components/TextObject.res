@@ -76,9 +76,9 @@ module WordNode = {
 
     <>
       {wordPart.leader->Option.getOr("")->React.string}
-      <button onClick={onClickHandler} className="word" style={style}>
+      <span onClick={onClickHandler} className="word" style={style}>
         {wordPart.text->React.string}
-      </button>
+      </span>
       {wordPart.trailer->Option.getOr("")->React.string}
     </>
   }
