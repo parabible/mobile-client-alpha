@@ -299,7 +299,7 @@ module OrderedResults = {
   }
 }
 
-type mode = Ready | Loading
+type mode = Ready | Loading | Error
 
 @react.component
 let make = () => {
@@ -351,7 +351,7 @@ let make = () => {
         | Belt.Result.Error(e) => {
             e->Console.error
             setMatchingText(_ => None)
-            setCurrentMode(_ => Ready)
+            setCurrentMode(_ => Error)
           }
         | Belt.Result.Ok(results) => {
             let columnHasData =
@@ -416,31 +416,34 @@ let make = () => {
     </IonHeader>
     <IonContent ref={ReactDOM.Ref.domRef(ref)} className="ion-padding" scrollX={true}>
       <LoadingIndicator visible={currentMode == Loading} />
-      {switch (searchTerms->Array.length > 0, matchingText) {
-      | (true, Some(matchingText)) =>
-        <>
-          <div className={"result-count"}>
-            {`${resultsCount->Int.toString} matches ∙ ${searchTerms
-              ->Array.length
-              ->Int.toString} search terms`->React.string}
-          </div>
-          <Pagination
-            totalPages={totalPages}
-            currentPage={pageNumber}
-            setPageNumber={i => setPageNumber(_ => i)}
-          />
-          <OrderedResults results={matchingText} visibleModules={textualEditionsToDisplay} />
-          <Pagination
-            totalPages={totalPages}
-            currentPage={pageNumber}
-            setPageNumber={i => setPageNumber(_ => i)}
-          />
-        </>
-      | (false, _) => <CenteredDiv> {"No search terms"->React.string} </CenteredDiv>
-      | (true, None) =>
-        <CenteredDiv>
-          {(currentMode == Loading ? "" : "Something has gone horribly wrong")->React.string}
-        </CenteredDiv>
+      {switch (currentMode, searchTerms->Array.length > 0) {
+      | (Error, _) =>
+        <CenteredDiv> {"Something has gone horribly wrong"->React.string} </CenteredDiv>
+      | (_, false) => <CenteredDiv> {"No search terms"->React.string} </CenteredDiv>
+      | (_, true) =>
+        switch (matchingText, resultsCount) {
+        | (None, _) => <CenteredDiv> {"Something has gone horribly wrong"->React.string} </CenteredDiv>
+        | (Some(_), 0) => <CenteredDiv> {"No results"->React.string} </CenteredDiv>
+        | (Some(matchingText), _) =>
+          <>
+            <div className={"result-count"}>
+              {`${resultsCount->Int.toString} matches ∙ ${searchTerms
+                ->Array.length
+                ->Int.toString} search terms`->React.string}
+            </div>
+            <Pagination
+              totalPages={totalPages}
+              currentPage={pageNumber}
+              setPageNumber={i => setPageNumber(_ => i)}
+            />
+            <OrderedResults results={matchingText} visibleModules={textualEditionsToDisplay} />
+            <Pagination
+              totalPages={totalPages}
+              currentPage={pageNumber}
+              setPageNumber={i => setPageNumber(_ => i)}
+            />
+          </>
+        }
       }}
     </IonContent>
   </IonModal>
