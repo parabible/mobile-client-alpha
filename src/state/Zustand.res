@@ -19,6 +19,18 @@ module Zustand = {
 }
 
 type selectedWord = {id: int, moduleId: int}
+type syntaxFilter = Verse | Sentence | Clause | Phrase | None
+let availableSyntaxFilters: array<syntaxFilter> = [Phrase, Clause, Sentence, Verse, None]
+let defaultSyntaxFilter = Verse
+type corpusFilter = WholeBible | OldTestament | Pentateuch | NewTestament | None
+let availableCorpusFilters: array<corpusFilter> = [
+  WholeBible,
+  OldTestament,
+  Pentateuch,
+  NewTestament,
+  None,
+]
+let defaultCorpusFilter: corpusFilter = None
 type reference = {book: string, chapter: string}
 type textualEdition = {id: int, abbreviation: string, visible: bool}
 type searchTermDataPoint = {key: string, value: string}
@@ -31,8 +43,12 @@ module AppStore = {
     setSearchTerms: array<searchTerm> => unit,
     addSearchTerm: searchTerm => unit,
     deleteSearchTerm: int => unit,
+    syntaxFilter: syntaxFilter,
+    setSyntaxFilter: syntaxFilter => unit,
+    corpusFilter: corpusFilter,
+    setCorpusFilter: corpusFilter => unit,
     reference: reference,
-    setReference: (reference) => unit,
+    setReference: reference => unit,
     showWordInfo: bool,
     setShowWordInfo: bool => unit,
     showSearchResults: bool,
@@ -62,14 +78,28 @@ let store = SomeStore.create(set => {
       ...state,
       searchTerms: [...state.searchTerms, searchTermDataPoint],
     }),
-    deleteSearchTerm: index => {
-      set(state => {
-        ...state,
-        searchTerms: state.searchTerms->Array.filterWithIndex((_, i) => i !== index),
-      })
-    },
+  deleteSearchTerm: index => {
+    set(state => {
+      ...state,
+      searchTerms: state.searchTerms->Array.filterWithIndex((_, i) => i !== index),
+    })
+  },
+  syntaxFilter: defaultSyntaxFilter,
+  setSyntaxFilter: syntaxFilter => {
+    set(state => {
+      ...state,
+      syntaxFilter,
+    })
+  },
+  corpusFilter: defaultCorpusFilter,
+  setCorpusFilter: corpusFilter => {
+    set(state => {
+      ...state,
+      corpusFilter,
+    })
+  },
   reference: {book: "Genesis", chapter: "1"},
-  setReference: (reference) =>
+  setReference: reference =>
     set(state => {
       ...state,
       reference,
@@ -104,3 +134,55 @@ let serializeSearchTerms = (searchTerms: array<searchTerm>) =>
     ->Array.join("&")
   )
   ->Array.join("&")
+
+let syntaxFilterStringToVariant = (syntaxFilterString: string) =>
+  switch syntaxFilterString {
+  | "Verse" => Verse
+  | "Sentence" => Sentence
+  | "Clause" => Clause
+  | "Phrase" => Phrase
+  | "Parallel" => None
+  | _ => None
+  }
+let syntaxFilterVariantToString = (syntaxFilter: syntaxFilter) =>
+  switch syntaxFilter {
+  | Verse => "Verse"
+  | Sentence => "Sentence"
+  | Clause => "Clause"
+  | Phrase => "Phrase"
+  | None => "Parallel"
+  }
+let syntaxFilterToTreeNodeTypeString = (syntaxFilter: syntaxFilter) =>
+  switch syntaxFilter {
+  | Verse => "verse"
+  | Sentence => "sentence"
+  | Clause => "clause"
+  | Phrase => "phrase"
+  | None => "parallel"
+  }
+
+let corpusFilterStringToVariant = (corpusFilterString: string) =>
+  switch corpusFilterString {
+  | "Whole Bible" => WholeBible
+  | "Old Testament" => OldTestament
+  | "Pentateuch" => Pentateuch
+  | "New Testament" => NewTestament
+  | "No Filter" => None
+  | _ => None
+  }
+let corpusFilterVariantToString = (corpusFilter: corpusFilter) =>
+  switch corpusFilter {
+  | WholeBible => "Whole Bible"
+  | OldTestament => "Old Testament"
+  | Pentateuch => "Pentateuch"
+  | NewTestament => "New Testament"
+  | None => "No Filter"
+  }
+let corpusToReferenceString = (corpusFilter: corpusFilter) =>
+  switch corpusFilter {
+  | WholeBible => "gen-rev"
+  | OldTestament => "gen-mal"
+  | Pentateuch => "gen-deut"
+  | NewTestament => "mat-rev"
+  | None => ""
+  }

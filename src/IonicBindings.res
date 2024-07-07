@@ -200,15 +200,25 @@ module IonItemDivider = {
   external make: (~children: React.element) => React.element = "IonItemDivider"
 }
 
-type alertButtonInterface = {
-  text: string,
-  role?: string,
-  id?: string,
-  handler?: unit => unit,
+// type alertButtonInterface = {
+//   text: string,
+//   role?: string,
+//   id?: string,
+//   handler?: unit => unit,
+// }
+type eventDetail = {values: string}
+type eventData = {data: eventDetail}
+type alertDismissEvent = {detail: eventData}
+type alertInputType = [#text | #checkbox | #radio | #textarea]
+type alertInput = {
+  \"type"?: alertInputType,
+  name?: string,
+  placeholder?: string,
+  value?: string,
+  label?: string,
+  checked?: bool,
+  disabled?: bool,
 }
-
-type eventDetail = {role: string}
-type alertDismissEvent = {detail: eventDetail}
 module IonAlert = {
   @module("@ionic/react") @react.component
   external make: (
@@ -216,17 +226,22 @@ module IonAlert = {
     ~header: string=?,
     ~subHeader: string=?,
     ~message: string=?,
-    ~buttons: array<alertButtonInterface>=?,
+    // ~buttons: array<alertButtonInterface>=?,
+    ~buttons: array<string>=?,
+    ~inputs: array<alertInput>=?,
     ~onDidDismiss: alertDismissEvent => unit=?,
   ) => React.element = "IonAlert"
 }
 
 module IonPopover = {
+  type popoverAlignment = [#center | #start | #end]
+  type popoverSide = [#top | #bottom | #start | #end | #left | #right]
   @module("@ionic/react") @react.component
   external make: (
     ~trigger: string,
     ~dismissOnSelect: bool=?,
-    ~side: string=?,
+    ~side: popoverSide=?,
+    ~alignment: popoverAlignment=?,
     ~children: React.element,
   ) => React.element = "IonPopover"
 }
@@ -249,8 +264,12 @@ module IonSpinner = {
 
 module IonItemOption = {
   @module("@ionic/react") @react.component
-  external make: (~color: ionColor=?, ~onClick: unit => unit=?, ~expandable: bool=?, ~children: React.element) => React.element =
-    "IonItemOption"
+  external make: (
+    ~color: ionColor=?,
+    ~onClick: unit => unit=?,
+    ~expandable: bool=?,
+    ~children: React.element,
+  ) => React.element = "IonItemOption"
 }
 
 module IonItemOptions = {
@@ -262,10 +281,25 @@ module IonItemOptions = {
 
 module IonItemSliding = {
   @module("@ionic/react") @react.component
-  external make: ( ~children: React.element) => React.element =
-    "IonItemSliding"
+  external make: (~children: React.element) => React.element = "IonItemSliding"
 }
 
+module IonRadioGroup = {
+  type eventDetail = {value: string}
+  type event = {detail: eventDetail}
+  @module("@ionic/react") @react.component
+  external make: (
+    ~value: string,
+    ~onIonChange: event => unit=?,
+    ~children: React.element,
+  ) => React.element = "IonRadioGroup"
+}
+
+module IonRadio = {
+  @module("@ionic/react") @react.component
+  external make: (~key: string, ~value: string, ~children: React.element) => React.element =
+    "IonRadio"
+}
 
 module IonIcons = {
   @module("ionicons/icons") external library: React.element = "library"

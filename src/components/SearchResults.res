@@ -43,16 +43,48 @@ let decodeTermSearchResult = Json.Decode.object(field => {
   warmWords: field.required("warmWords", decodeWarmWords),
 })
 
-let getUrl = (serializedSearchTerms, textualEditionAbbreviations, pageNumber, pageSize) =>
-  `https://dev.parabible.com/api/v2/termSearch?${serializedSearchTerms}&modules=${textualEditionAbbreviations}&treeNodeType=verse&page=${pageNumber->Int.toString}&pageSize=${pageSize->Int.toString}`
+let getUrl = (
+  ~serializedSearchTerms,
+  ~textualEditionAbbreviations,
+  ~syntaxFilter: Zustand.syntaxFilter,
+  ~corpusFilter: Zustand.corpusFilter,
+  ~pageNumber,
+  ~pageSize,
+) => {
+  let modules = `modules=${textualEditionAbbreviations}`
+  let syntaxFilter = `treeNodeType=${Zustand.syntaxFilterToTreeNodeTypeString(syntaxFilter)}`
+  let corpusFilter = switch corpusFilter {
+  | None => ""
+  | corpusFilter => `corpusFilter=${Zustand.corpusToReferenceString(corpusFilter)}`
+  }
+  corpusFilter->Console.log
+  let pageNumber = `page=${pageNumber->Int.toString}`
+  let pageSize = `pageSize=${pageSize->Int.toString}`
+
+  let vars =
+    [serializedSearchTerms, modules, syntaxFilter, corpusFilter, pageNumber, pageSize]
+    ->Array.filter(s => s != "")
+    ->Array.join("&")
+
+  `https://dev.parabible.com/api/v2/termSearch?${vars}`
+}
 
 let getSearchResults = async (
-  serializedSearchTerms,
-  textualEditionAbbreviations,
-  pageNumber,
-  pageSize,
+  ~serializedSearchTerms,
+  ~syntaxFilter,
+  ~corpusFilter,
+  ~textualEditionAbbreviations,
+  ~pageNumber,
+  ~pageSize,
 ) => {
-  let url = getUrl(serializedSearchTerms, textualEditionAbbreviations, pageNumber, pageSize)
+  let url = getUrl(
+    ~serializedSearchTerms,
+    ~textualEditionAbbreviations,
+    ~syntaxFilter,
+    ~corpusFilter,
+    ~pageNumber,
+    ~pageSize,
+  )
   let response = await Fetch.fetch(url, {method: #GET})
   let json = await response->Fetch.Response.json
   json->Json.decode(decodeTermSearchResult)
@@ -111,40 +143,74 @@ module SearchTermItem = {
   }
 }
 
-module PopoverSelectList = {
-  @react.component
-  let make = (~trigger, ~children) => {
-    <IonPopover trigger={trigger} dismissOnSelect={true} side={"right"}>
-      <IonContent>
-        <IonList> {children} </IonList>
-      </IonContent>
-    </IonPopover>
-  }
-}
+// module PopoverSelectList = {
+//   @react.component
+//   let make = (~trigger, ~children) => {
+//     <IonPopover trigger={trigger} dismissOnSelect={false} side={#bottom} alignment={#center}>
+//       <IonContent>
+//         <IonList> {children} </IonList>
+//       </IonContent>
+//     </IonPopover>
+//   }
+// }
 
 module SearchMenu = {
   @react.component
   let make = () => {
     let searchTerms = Zustand.store->Zustand.SomeStore.use(state => state.searchTerms)
     let deleteSearchTerm = Zustand.store->Zustand.SomeStore.use(state => state.deleteSearchTerm)
-    <IonPopover trigger="popover-button">
+    let syntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.syntaxFilter)
+    let setSyntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.setSyntaxFilter)
+    let corpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.corpusFilter)
+    let setCorpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.setCorpusFilter)
+    <IonPopover trigger="popover-button" dismissOnSelect={false}>
       <IonContent>
         <IonList>
           <IonItemGroup>
-            <IonItem button={true} id="syntax-filter-trigger">
+            <IonItem button={true} id="syntax-filter-trigger-alert">
               <IonIcon icon={IonIcons.codeWorking} slot="start" />
-              {"Clauses"->React.string}
+              <IonLabel>
+                <h2> {Zustand.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
+                <p> {"Syntax Filter"->React.string} </p>
+              </IonLabel>
             </IonItem>
-            <PopoverSelectList trigger="syntax-filter-trigger">
-              <IonItem button={true} detail={false}> {"Nested option"->React.string} </IonItem>
-            </PopoverSelectList>
-            <IonItem button={true} id="book-filter-trigger">
+            <IonAlert
+              trigger="syntax-filter-trigger-alert"
+              header="Syntax Filter"
+              inputs={Zustand.availableSyntaxFilters->Array.map(f => {
+                \"type": #radio,
+                label: Zustand.syntaxFilterVariantToString(f),
+                value: Zustand.syntaxFilterVariantToString(f),
+                checked: syntaxFilter == f,
+              })}
+              buttons={["OK"]}
+              onDidDismiss={eventDetail =>
+                setSyntaxFilter(
+                  Zustand.syntaxFilterStringToVariant(eventDetail.detail.data.values),
+                )}
+            />
+            <IonItem button={true} id="book-filter-trigger-alert">
               <IonIcon icon={IonIcons.filter} slot="start" />
-              {"Whole Bible"->React.string}
+              <IonLabel>
+                <h2> {Zustand.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
+                <p> {"Corpus Filter"->React.string} </p>
+              </IonLabel>
             </IonItem>
-            <PopoverSelectList trigger="book-filter-trigger">
-              <IonItem button={true} detail={false}> {"Nested option"->React.string} </IonItem>
-            </PopoverSelectList>
+            <IonAlert
+              trigger="book-filter-trigger-alert"
+              header="Syntax Filter"
+              inputs={Zustand.availableCorpusFilters->Array.map(f => {
+                \"type": #radio,
+                label: Zustand.corpusFilterVariantToString(f),
+                value: Zustand.corpusFilterVariantToString(f),
+                checked: corpusFilter == f,
+              })}
+              buttons={["OK"]}
+              onDidDismiss={eventDetail =>
+                setCorpusFilter(
+                  Zustand.corpusFilterStringToVariant(eventDetail.detail.data.values),
+                )}
+            />
           </IonItemGroup>
           <IonItemGroup>
             <IonItemDivider>
@@ -245,6 +311,8 @@ let make = () => {
   let searchTerms = Zustand.store->Zustand.SomeStore.use(state => state.searchTerms)
   let setSearchTerms = Zustand.store->Zustand.SomeStore.use(state => state.setSearchTerms)
   let serializedSearchTerms = Zustand.serializeSearchTerms(searchTerms)
+  let syntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.syntaxFilter)
+  let corpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.corpusFilter)
   let textualEditions = Zustand.store->Zustand.SomeStore.use(state => state.textualEditions)
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
   let textualEditionAbbreviations =
@@ -262,7 +330,7 @@ let make = () => {
     None
   }, [serializedSearchTerms])
 
-  React.useEffect3(() => {
+  React.useEffect5(() => {
     // TODO: make sure that only pagenumber has changed...
     if searchTerms->Array.length === 0 {
       setMatchingText(_ => None)
@@ -272,10 +340,12 @@ let make = () => {
       serializedSearchTerms->Console.log
       setCurrentMode(_ => Loading)
       let _ = getSearchResults(
-        serializedSearchTerms,
-        textualEditionAbbreviations,
-        pageNumber,
-        pageSizeConstant,
+        ~serializedSearchTerms,
+        ~syntaxFilter,
+        ~corpusFilter,
+        ~textualEditionAbbreviations,
+        ~pageNumber,
+        ~pageSize=pageSizeConstant,
       )->Promise.then(results => {
         switch results {
         | Belt.Result.Error(e) => {
@@ -316,7 +386,7 @@ let make = () => {
       })
     }
     None
-  }, (serializedSearchTerms, textualEditionAbbreviations, pageNumber))
+  }, (serializedSearchTerms, syntaxFilter, corpusFilter, textualEditionAbbreviations, pageNumber))
 
   let totalPages =
     (resultsCount->Int.toFloat /. pageSizeConstant->Int.toFloat)->Js.Math.ceil_int - 1
