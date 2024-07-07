@@ -35,7 +35,7 @@ let getWordInfo = async (wordId, textualEditionId) => {
   json->Json.decode(wordInfoDecoder)
 }
 
-let wordInfoToDataPoint: wordInfoEntry => Zustand.searchTermDataPoint = wi => {
+let wordInfoToDataPoint: wordInfoEntry => State.searchTermDataPoint = wi => {
   key: wi.key,
   value: wi.value,
 }
@@ -72,19 +72,19 @@ let make = () => {
   let (currentWordInfo, setCurrentWordInfo) = React.useState(_ => [])
   let (checkedDataPoints, setCheckedDataPoints) = React.useState(_ => [])
   let (currentMode, setCurrentMode) = React.useState(_ => View)
-  let selectedWord = Zustand.store->Zustand.SomeStore.use(state => state.selectedWord)
-  let showWordInfo = Zustand.store->Zustand.SomeStore.use(state => state.showWordInfo)
-  let setShowWordInfo = Zustand.store->Zustand.SomeStore.use(state => {
+  let selectedWord = Store.store->Store.MobileClient.use(state => state.selectedWord)
+  let showWordInfo = Store.store->Store.MobileClient.use(state => state.showWordInfo)
+  let setShowWordInfo = Store.store->Store.MobileClient.use(state => {
     state.setShowWordInfo
   })
   let hideWordInfo = () => {
     setCurrentMode(_ => View)
     setShowWordInfo(false)
   }
-  let setShowSearchResults = Zustand.store->Zustand.SomeStore.use(state => {
+  let setShowSearchResults = Store.store->Store.MobileClient.use(state => {
     state.setShowSearchResults
   })
-  let addSearchTerm = Zustand.store->Zustand.SomeStore.use(state => state.addSearchTerm)
+  let addSearchTerm = Store.store->Store.MobileClient.use(state => state.addSearchTerm)
 
   React.useEffect(() => {
     if showWordInfo {
@@ -113,7 +113,7 @@ let make = () => {
     ->Option.map(wi => wi.value)
     ->Option.getOr("")
   let addSearch = () => {
-    let searchTerm: Zustand.searchTerm = switch currentMode {
+    let searchTerm: State.searchTerm = switch currentMode {
     | View => {
         uuid: WindowBindings.randomUUID(),
         inverted: false,

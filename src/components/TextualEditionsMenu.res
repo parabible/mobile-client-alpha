@@ -1,7 +1,5 @@
 open IonicBindings
 
-let defaultEnabledTextualEditions = ["BHSA", "NET", "NA1904", "CAFE", "APF"]
-
 let decodeTextualEditions = Json.Decode.object(container =>
   {
     "data": container.required(
@@ -20,8 +18,8 @@ let decodeTextualEditions = Json.Decode.object(container =>
 
 @react.component
 let make = () => {
-  let textualEditions = Zustand.store->Zustand.SomeStore.use(state => state.textualEditions)
-  let setTextualEditions = Zustand.store->Zustand.SomeStore.use(state => {
+  let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
+  let setTextualEditions = Store.store->Store.MobileClient.use(state => {
     state.setTextualEditions
   })
   let toggleTextualEdition = id => {
@@ -68,10 +66,10 @@ let make = () => {
         | Belt.Result.Ok(d) => {
             let mappedTextualEditions = d["data"]->Array.map(
               m => {
-                let t: Zustand.textualEdition = {
+                let t: State.textualEdition = {
                   id: m["moduleId"],
                   abbreviation: m["abbreviation"],
-                  visible: defaultEnabledTextualEditions->Array.includes(m["abbreviation"])
+                  visible: State.defaultEnabledTextualEditions->Array.includes(m["abbreviation"])
                 }
                 t
               },

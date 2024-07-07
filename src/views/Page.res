@@ -5,14 +5,14 @@ open IonicBindings
 let make = () => {
   let ref = React.useRef(Nullable.null)
   // let state = React.useContext(State.context)
-  let reference = Zustand.store->Zustand.SomeStore.use(state => {
-    let r: Zustand.reference = {
+  let reference = Store.store->Store.MobileClient.use(state => {
+    let r: State.reference = {
       book: state.reference.book,
       chapter: state.reference.chapter,
     }
     r
   })
-  let setReference = Zustand.store->Zustand.SomeStore.use(state => state.setReference)
+  let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
   let goToAdjacentChapter = forward => {
     let newReference = Books.getAdjacentChapter(reference, forward)
     setReference(newReference)

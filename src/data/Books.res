@@ -37,8 +37,8 @@ let allBooks = switch booksList {
 
 let books = allBooks->Array.filterMap(b => b)
 
-let getAdjacentChapter: (Zustand.reference, bool) => Zustand.reference = (
-  reference: Zustand.reference,
+let getAdjacentChapter: (State.reference, bool) => State.reference = (
+  reference: State.reference,
   forward,
 ) => {
   let bookIndex = books->Array.findIndex(b => b.name === reference.book)

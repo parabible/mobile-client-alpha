@@ -7,12 +7,12 @@ let apiEndpoint = baseUrl ++ "/text"
 let getUrl = (reference: string, editionsString: string) =>
   `${apiEndpoint}?reference=${reference}&modules=${editionsString}`
 
-let textualEditionsAsString = (textualEditions: array<Zustand.textualEdition>) =>
+let textualEditionsAsString = (textualEditions: array<State.textualEdition>) =>
   textualEditions->Array.map(m => m.abbreviation)->Array.join(",")
 
 let getChapterData = async (
-  reference: Zustand.reference,
-  textualEditionsToDisplay: array<Zustand.textualEdition>,
+  reference: State.reference,
+  textualEditionsToDisplay: array<State.textualEdition>,
 ) => {
   let textualEditionsToDisplayAbbreviations = textualEditionsToDisplay->textualEditionsAsString
   let url = getUrl(`${reference.book} ${reference.chapter}`, textualEditionsToDisplayAbbreviations)
@@ -24,10 +24,10 @@ let getChapterData = async (
 module VerseTable = {
   @react.component
   let make = (
-    ~textualEditions: array<Zustand.textualEdition>,
+    ~textualEditions: array<State.textualEdition>,
     ~chapterData: array<array<option<TextObject.textObject>>>,
   ) => {
-    let reference = Zustand.store->Zustand.SomeStore.use(state => state.reference)
+    let reference = Store.store->Store.MobileClient.use(state => state.reference)
     textualEditions->Array.length === 0
       ? <div>
           {`No textual editions are enabled for ${reference.book} ${reference.chapter}`->React.string}
@@ -80,13 +80,13 @@ module VerseTable = {
 
 @react.component
 let make = (
-  ~reference: Zustand.reference,
+  ~reference: State.reference,
   ~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>,
 ) => {
   let buttonRef = React.useRef(Nullable.null)
   let (chapterData, setChapterData) = React.useState(_ => [])
-  let setReference = Zustand.store->Zustand.SomeStore.use(state => state.setReference)
-  let textualEditions = Zustand.store->Zustand.SomeStore.use(state => state.textualEditions)
+  let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
+  let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
   let (textualEditionsToDisplay, setTextualEditionsToDisplay) = React.useState(_ => [])
 

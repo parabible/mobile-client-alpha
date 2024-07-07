@@ -44,7 +44,7 @@ type mode = Book | Chapter
 let make = () => {
   // let inputRef = React.useRef(Js.Nullable.null);
   let (currentMode, setCurrentMode) = React.useState(_ => Book)
-  let setReference = Zustand.store->Zustand.SomeStore.use(state => state.setReference)
+  let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
   let (searchValue, setSearchValue) = React.useState(_ => "")
   let filterIsApplied = searchValue->String.length > 0
   let (selectedBook, setSelectedBookState) = React.useState(_ => None)

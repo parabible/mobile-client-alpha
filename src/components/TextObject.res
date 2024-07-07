@@ -48,14 +48,14 @@ let getStyleFor: string => JsxDOM.style = (abbr: string) =>
 module WordNode = {
   @react.component
   let make = (~wordPart: wordObject, ~textualEditionId: int) => {
-    let selectedWord = Zustand.store->Zustand.SomeStore.use(state => {
+    let selectedWord = Store.store->Store.MobileClient.use(state => {
       state.selectedWord
     })
 
-    let setSelectedWord = Zustand.store->Zustand.SomeStore.use(state => {
+    let setSelectedWord = Store.store->Store.MobileClient.use(state => {
       state.setSelectedWord
     })
-    let setShowWordInfo = Zustand.store->Zustand.SomeStore.use(state => {
+    let setShowWordInfo = Store.store->Store.MobileClient.use(state => {
       state.setShowWordInfo
     })
     let onClickHandler = _ => {

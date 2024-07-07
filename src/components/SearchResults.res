@@ -46,16 +46,16 @@ let decodeTermSearchResult = Json.Decode.object(field => {
 let getUrl = (
   ~serializedSearchTerms,
   ~textualEditionAbbreviations,
-  ~syntaxFilter: Zustand.syntaxFilter,
-  ~corpusFilter: Zustand.corpusFilter,
+  ~syntaxFilter: State.syntaxFilter,
+  ~corpusFilter: State.corpusFilter,
   ~pageNumber,
   ~pageSize,
 ) => {
   let modules = `modules=${textualEditionAbbreviations}`
-  let syntaxFilter = `treeNodeType=${Zustand.syntaxFilterToTreeNodeTypeString(syntaxFilter)}`
+  let syntaxFilter = `treeNodeType=${Store.syntaxFilterToTreeNodeTypeString(syntaxFilter)}`
   let corpusFilter = switch corpusFilter {
   | None => ""
-  | corpusFilter => `corpusFilter=${Zustand.corpusToReferenceString(corpusFilter)}`
+  | corpusFilter => `corpusFilter=${Store.corpusToReferenceString(corpusFilter)}`
   }
   let pageNumber = `page=${pageNumber->Int.toString}`
   let pageSize = `pageSize=${pageSize->Int.toString}`
@@ -117,7 +117,7 @@ module LoadingIndicator = {
 
 module SearchTermItem = {
   @react.component
-  let make = (~term: Zustand.searchTerm, ~invertSearchTerm, ~editSearchTerm, ~dropSearchTerm) => {
+  let make = (~term: State.searchTerm, ~invertSearchTerm, ~editSearchTerm, ~dropSearchTerm) => {
     <IonItemSliding>
       <IonItem detail={true}>
         <IonLabel>
@@ -159,14 +159,14 @@ module SearchTermItem = {
 module SearchMenu = {
   @react.component
   let make = () => {
-    let searchTerms = Zustand.store->Zustand.SomeStore.use(state => state.searchTerms)
-    let deleteSearchTerm = Zustand.store->Zustand.SomeStore.use(state => state.deleteSearchTerm)
-    let setSearchTerms = Zustand.store->Zustand.SomeStore.use(state => state.setSearchTerms)
+    let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
+    let deleteSearchTerm = Store.store->Store.MobileClient.use(state => state.deleteSearchTerm)
+    let setSearchTerms = Store.store->Store.MobileClient.use(state => state.setSearchTerms)
     let invertSearchTerm = index =>
       setSearchTerms(
         searchTerms->Array.mapWithIndex((term, i) => {
           if i == index {
-            let term: Zustand.searchTerm = {
+            let term: State.searchTerm = {
               uuid: term.uuid,
               inverted: !term.inverted,
               data: term.data,
@@ -177,10 +177,10 @@ module SearchMenu = {
           }
         }),
       )
-    let syntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.syntaxFilter)
-    let setSyntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.setSyntaxFilter)
-    let corpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.corpusFilter)
-    let setCorpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.setCorpusFilter)
+    let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
+    let setSyntaxFilter = Store.store->Store.MobileClient.use(state => state.setSyntaxFilter)
+    let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
+    let setCorpusFilter = Store.store->Store.MobileClient.use(state => state.setCorpusFilter)
     <IonPopover trigger="popover-button" dismissOnSelect={false}>
       <IonContent>
         <IonList>
@@ -188,45 +188,45 @@ module SearchMenu = {
             <IonItem button={true} id="syntax-filter-trigger-alert">
               <IonIcon icon={IonIcons.codeWorking} slot="start" />
               <IonLabel>
-                <h2> {Zustand.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
+                <h2> {Store.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
                 <p> {"Syntax Filter"->React.string} </p>
               </IonLabel>
             </IonItem>
             <IonAlert
               trigger="syntax-filter-trigger-alert"
               header="Syntax Filter"
-              inputs={Zustand.availableSyntaxFilters->Array.map(f => {
+              inputs={State.availableSyntaxFilters->Array.map(f => {
                 \"type": #radio,
-                label: Zustand.syntaxFilterVariantToString(f),
-                value: Zustand.syntaxFilterVariantToString(f),
+                label: Store.syntaxFilterVariantToString(f),
+                value: Store.syntaxFilterVariantToString(f),
                 checked: syntaxFilter == f,
               })}
               buttons={["OK"]}
               onDidDismiss={eventDetail =>
                 setSyntaxFilter(
-                  Zustand.syntaxFilterStringToVariant(eventDetail.detail.data.values),
+                  Store.syntaxFilterStringToVariant(eventDetail.detail.data.values),
                 )}
             />
             <IonItem button={true} id="book-filter-trigger-alert">
               <IonIcon icon={IonIcons.filter} slot="start" />
               <IonLabel>
-                <h2> {Zustand.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
+                <h2> {Store.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
                 <p> {"Corpus Filter"->React.string} </p>
               </IonLabel>
             </IonItem>
             <IonAlert
               trigger="book-filter-trigger-alert"
               header="Syntax Filter"
-              inputs={Zustand.availableCorpusFilters->Array.map(f => {
+              inputs={State.availableCorpusFilters->Array.map(f => {
                 \"type": #radio,
-                label: Zustand.corpusFilterVariantToString(f),
-                value: Zustand.corpusFilterVariantToString(f),
+                label: Store.corpusFilterVariantToString(f),
+                value: Store.corpusFilterVariantToString(f),
                 checked: corpusFilter == f,
               })}
               buttons={["OK"]}
               onDidDismiss={eventDetail =>
                 setCorpusFilter(
-                  Zustand.corpusFilterStringToVariant(eventDetail.detail.data.values),
+                  Store.corpusFilterStringToVariant(eventDetail.detail.data.values),
                 )}
             />
           </IonItemGroup>
@@ -254,7 +254,7 @@ module SearchMenu = {
 
 module OrderedResults = {
   @react.component
-  let make = (~results, ~visibleModules: array<Zustand.textualEdition>) => {
+  let make = (~results, ~visibleModules: array<State.textualEdition>) => {
     let getTextualEditionByIndex = index => visibleModules->Array.get(index)
     <table>
       <thead>
@@ -323,21 +323,21 @@ let make = () => {
   let (resultsCount, setResultsCount) = React.useState(_ => 0)
   let (matchingText, setMatchingText) = React.useState(_ => None)
   let (pageNumber, setPageNumber) = React.useState(_ => 0)
-  let searchTerms = Zustand.store->Zustand.SomeStore.use(state => state.searchTerms)
-  let setSearchTerms = Zustand.store->Zustand.SomeStore.use(state => state.setSearchTerms)
-  let serializedSearchTerms = Zustand.serializeSearchTerms(searchTerms)
-  let syntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.syntaxFilter)
-  let corpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.corpusFilter)
-  let textualEditions = Zustand.store->Zustand.SomeStore.use(state => state.textualEditions)
+  let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
+  let setSearchTerms = Store.store->Store.MobileClient.use(state => state.setSearchTerms)
+  let serializedSearchTerms = Store.serializeSearchTerms(searchTerms)
+  let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
+  let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
+  let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
   let textualEditionAbbreviations =
     enabledTextualEditions
     ->Array.map(m => m.abbreviation)
     ->Array.join(",")
   let (textualEditionsToDisplay, setTextualEditionsToDisplay) = React.useState(_ => [])
-  let showSearchResults = Zustand.store->Zustand.SomeStore.use(state => state.showSearchResults)
+  let showSearchResults = Store.store->Store.MobileClient.use(state => state.showSearchResults)
   let setShowSearchResults =
-    Zustand.store->Zustand.SomeStore.use(state => state.setShowSearchResults)
+    Store.store->Store.MobileClient.use(state => state.setShowSearchResults)
   let hideSearchResults = () => setShowSearchResults(false)
 
   React.useEffect(() => {
