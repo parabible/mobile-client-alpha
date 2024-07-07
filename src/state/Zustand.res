@@ -64,19 +64,87 @@ module AppStore = {
 
 module SomeStore = Zustand.MakeStore(AppStore)
 
+// read from localstorage:
+// let decodeTextObject = Json.Decode.object(field => {
+//   parallelId: field.required("parallelId", Json.Decode.int),
+//   textualEditionId: field.required("moduleId", Json.Decode.int),
+//   rid: field.required("rid", Json.Decode.int),
+//   \"type": field.required("type", Json.Decode.string),
+//   html: field.required("html", Json.Decode.string),
+//   wordArray: field.required("wordArray", decodeWordArray),
+// })
+
+// let decodeTextResult = Json.Decode.array(Json.Decode.array(Json.Decode.option(decodeTextObject)))
+let decodeSelectedWord = Json.Decode.object(field => {
+  id: field.required("id", Json.Decode.int),
+  moduleId: field.required("moduleId", Json.Decode.int),
+})
+let initialSelectedWord =
+  WindowBindings.LocalStorage.getItem("selectedWord")
+  ->Option.map(Json.parse)
+  ->Option.getOr(Belt.Result.Ok(Js.Json.null))
+  ->Belt.Result.getWithDefault(Js.Json.null)
+  ->Json.decode(decodeSelectedWord)
+  ->Belt.Result.getWithDefault({id: -1, moduleId: -1})
+
+// let initialSearchTerms = []
+let decodeSearchTermDataPoint = Json.Decode.object(field => {
+  key: field.required("key", Json.Decode.string),
+  value: field.required("value", Json.Decode.string),
+})
+let decodeSearchTerms = Json.Decode.array(
+  Json.Decode.object(field => {
+    uuid: field.required("uuid", Json.Decode.string),
+    inverted: field.required("inverted", Json.Decode.bool),
+    data: field.required("data", Json.Decode.array(decodeSearchTermDataPoint)),
+  }),
+)
+let initialSearchTerms =
+  WindowBindings.LocalStorage.getItem("searchTerms")
+  ->Option.map(Json.parse)
+  ->Option.getOr(Belt.Result.Ok(Js.Json.null))
+  ->Belt.Result.getWithDefault(Js.Json.null)
+  ->Json.decode(decodeSearchTerms)
+  ->Belt.Result.getWithDefault([])
+// let initialSyntaxFilter = defaultSyntaxFilter
+// let initialCorpusFilter = defaultCorpusFilter
+// let initialReference = {book: "Genesis", chapter: "1"}
+let decodeReference = Json.Decode.object(field => {
+  book: field.required("book", Json.Decode.string),
+  chapter: field.required("chapter", Json.Decode.string),
+})
+let initialReference =
+  WindowBindings.LocalStorage.getItem("reference")
+  ->Option.map(Json.parse)
+  ->Option.getOr(Belt.Result.Ok(Js.Json.null))
+  ->Belt.Result.getWithDefault(Js.Json.null)
+  ->Json.decode(decodeReference)
+  ->Belt.Result.getWithDefault({book: "John", chapter: "1"})
+// let initialTextualEditions = []
+
 let store = SomeStore.create(set => {
-  selectedWord: {id: -1, moduleId: -1},
-  setSelectedWord: selectedWord =>
+  selectedWord: initialSelectedWord,
+  setSelectedWord: selectedWord => {
+    WindowBindings.LocalStorage.setItem(
+      "selectedWord",
+      selectedWord->JSON.stringifyAny->Option.getOr(""),
+    )
     set(state => {
       ...state,
       selectedWord,
-    }),
-  searchTerms: [],
-  setSearchTerms: newSearchTerms =>
+    })
+  },
+  searchTerms: initialSearchTerms,
+  setSearchTerms: newSearchTerms => {
+    WindowBindings.LocalStorage.setItem(
+      "searchTerms",
+      newSearchTerms->JSON.stringifyAny->Option.getOr(""),
+    )
     set(state => {
       ...state,
       searchTerms: newSearchTerms,
-    }),
+    })
+  },
   addSearchTerm: searchTermDataPoint =>
     set(state => {
       ...state,
@@ -102,12 +170,14 @@ let store = SomeStore.create(set => {
       corpusFilter,
     })
   },
-  reference: {book: "Genesis", chapter: "1"},
-  setReference: reference =>
+  reference: initialReference,
+  setReference: reference => {
+    WindowBindings.LocalStorage.setItem("reference", reference->JSON.stringifyAny->Option.getOr(""))
     set(state => {
       ...state,
       reference,
-    }),
+    })
+  },
   showWordInfo: false,
   setShowWordInfo: show =>
     set(state => {
