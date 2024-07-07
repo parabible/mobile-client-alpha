@@ -320,4 +320,6 @@ module IonIcons = {
   @module("ionicons/icons") external trash: React.element = "trash"
   @module("ionicons/icons") external options: React.element = "options"
   @module("ionicons/icons") external power: React.element = "power"
+  @module("ionicons/icons") external flash: React.element = "flash"
+  @module("ionicons/icons") external flashOff: React.element = "flashOff"
 }

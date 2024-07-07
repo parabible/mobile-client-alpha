@@ -34,7 +34,10 @@ let defaultCorpusFilter: corpusFilter = None
 type reference = {book: string, chapter: string}
 type textualEdition = {id: int, abbreviation: string, visible: bool}
 type searchTermDataPoint = {key: string, value: string}
-type searchTerm = array<searchTermDataPoint>
+type searchTerm = {
+  inverted: bool,
+  data: array<searchTermDataPoint>,
+}
 module AppStore = {
   type state = {
     selectedWord: selectedWord,
@@ -127,11 +130,12 @@ let store = SomeStore.create(set => {
 let serializeSearchTerms = (searchTerms: array<searchTerm>) =>
   searchTerms
   ->Array.mapWithIndex((term, i) =>
-    term
-    ->Array.map(datapoint =>
-      ["t", i->Int.toString, "data", datapoint.key ++ "=" ++ datapoint.value]->Array.join(".")
-    )
-    ->Array.join("&")
+    [
+      ...term.data->Array.map(datapoint =>
+        ["t", i->Int.toString, "data", datapoint.key ++ "=" ++ datapoint.value]->Array.join(".")
+      ),
+      ["t", i->Int.toString, "inverted" ++ "=" ++ term.inverted->String.make]->Array.join("."),
+    ]->Array.join("&")
   )
   ->Array.join("&")
 

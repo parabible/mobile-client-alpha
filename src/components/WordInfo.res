@@ -113,12 +113,15 @@ let make = () => {
     ->Option.map(wi => wi.value)
     ->Option.getOr("")
   let addSearch = () => {
-    addSearchTerm([
+    addSearchTerm(
       {
-        key: "lexeme",
-        value: lexeme,
+        inverted: false,
+        data: [{
+          key: "lexeme",
+          value: lexeme,
+        }],
       },
-    ])
+    )
     setShowSearchResults(true)
     hideWordInfo()
   }
@@ -141,9 +144,9 @@ let make = () => {
         }}>
         <b> {lexeme->React.string} </b>
         <b> {gloss->React.string} </b>
-          <IonButton shape=#round onClick={addSearch}>
-            <IonIcon slot="icon-only" icon={IonIcons.search} />
-          </IonButton>
+        <IonButton shape=#round onClick={addSearch}>
+          <IonIcon slot="icon-only" icon={IonIcons.search} />
+        </IonButton>
       </div>
       <IonList>
         {currentWordInfo
@@ -178,7 +181,7 @@ let make = () => {
         </IonButton>
       | CreateSearchTerm =>
         <div style={{display: "grid", grid: "auto-flow / 1fr 1fr"}}>
-            <IonButton expand={#full} onClick={addSearch}> {"Search"->React.string} </IonButton>
+          <IonButton expand={#full} onClick={addSearch}> {"Search"->React.string} </IonButton>
           <IonButton expand={#full} color={#light} onClick={_ => setCurrentMode(_ => View)}>
             {"Cancel"->React.string}
           </IonButton>

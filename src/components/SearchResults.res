@@ -57,7 +57,6 @@ let getUrl = (
   | None => ""
   | corpusFilter => `corpusFilter=${Zustand.corpusToReferenceString(corpusFilter)}`
   }
-  corpusFilter->Console.log
   let pageNumber = `page=${pageNumber->Int.toString}`
   let pageSize = `pageSize=${pageSize->Int.toString}`
 
@@ -122,16 +121,19 @@ module SearchTermItem = {
     <IonItemSliding>
       <IonItem detail={true}>
         <IonLabel>
-          {term
-          ->Array.map(({value}) => `${value}`)
-          ->Array.join(" ")
-          ->React.string}
+          <h2>
+            {term.data
+            ->Array.map(({value}) => `${value}`)
+            ->Array.join(" ")
+            ->React.string}
+          </h2>
+          <p> {(term.inverted ? "inverted" : "")->React.string} </p>
         </IonLabel>
       </IonItem>
       <IonItemOptions side=#end>
-        // <IonItemOption onClick={invertSearchTerm}>
-        //   <IonIcon slot="icon-only" icon={IonIcons.power} />
-        // </IonItemOption>
+        <IonItemOption onClick={invertSearchTerm}>
+          <IonIcon slot="icon-only" icon={term.inverted ? IonIcons.flashOff : IonIcons.flash} />
+        </IonItemOption>
         // <IonItemOption onClick={editSearchTerm}>
         //   <IonIcon slot="icon-only" icon={IonIcons.options} />
         // </IonItemOption>
@@ -159,6 +161,18 @@ module SearchMenu = {
   let make = () => {
     let searchTerms = Zustand.store->Zustand.SomeStore.use(state => state.searchTerms)
     let deleteSearchTerm = Zustand.store->Zustand.SomeStore.use(state => state.deleteSearchTerm)
+    let setSearchTerms = Zustand.store->Zustand.SomeStore.use(state => state.setSearchTerms)
+    let invertSearchTerm = index => 
+      setSearchTerms(
+        searchTerms->Array.mapWithIndex((term, i) => {
+          if i == index {
+            let term: Zustand.searchTerm = {inverted: !term.inverted, data: term.data}
+            term
+          } else {
+            term
+          }
+        }),
+      )
     let syntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.syntaxFilter)
     let setSyntaxFilter = Zustand.store->Zustand.SomeStore.use(state => state.setSyntaxFilter)
     let corpusFilter = Zustand.store->Zustand.SomeStore.use(state => state.corpusFilter)
@@ -218,14 +232,11 @@ module SearchMenu = {
             </IonItemDivider>
             {searchTerms
             ->Array.mapWithIndex((term, i) => {
-              // TODO: Implement edit and invert search termns...
-              let logI = _ => i->Int.toString->Console.log
-
               <SearchTermItem
                 key={Zustand.serializeSearchTerms([term])}
                 term={term}
-                invertSearchTerm={logI}
-                editSearchTerm={logI}
+                invertSearchTerm={_ => invertSearchTerm(i)}
+                editSearchTerm={_ => ()}
                 dropSearchTerm={_ => deleteSearchTerm(i)}
               />
             })
@@ -337,7 +348,6 @@ let make = () => {
       setResultsCount(_ => 0)
       setTextualEditionsToDisplay(_ => [])
     } else if searchTerms->Array.length > 0 && textualEditionAbbreviations != "" {
-      serializedSearchTerms->Console.log
       setCurrentMode(_ => Loading)
       let _ = getSearchResults(
         ~serializedSearchTerms,
@@ -422,7 +432,8 @@ let make = () => {
       | (_, false) => <CenteredDiv> {"No search terms"->React.string} </CenteredDiv>
       | (_, true) =>
         switch (matchingText, resultsCount) {
-        | (None, _) => <CenteredDiv> {"Something has gone horribly wrong"->React.string} </CenteredDiv>
+        | (None, _) =>
+          <CenteredDiv> {"Something has gone horribly wrong"->React.string} </CenteredDiv>
         | (Some(_), 0) => <CenteredDiv> {"No results"->React.string} </CenteredDiv>
         | (Some(matchingText), _) =>
           <>
