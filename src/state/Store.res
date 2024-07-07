@@ -66,17 +66,31 @@ let store = MobileClient.create(set => {
       searchTerms: newSearchTerms,
     })
   },
-  addSearchTerm: searchTermDataPoint =>
+  addSearchTerm: (searchTerm: State.searchTerm) => {
     set(state => {
-      ...state,
-      searchTerms: [...state.searchTerms, searchTermDataPoint],
-    }),
-  deleteSearchTerm: index => {
-    set(state => {
-      ...state,
-      searchTerms: state.searchTerms->Array.filterWithIndex((_, i) => i !== index),
+      let searchTerms = [...state.searchTerms, searchTerm]
+      WindowBindings.LocalStorage.setItem(
+        "searchTerms",
+        searchTerms->JSON.stringifyAny->Option.getOr(""),
+      )
+      {
+        ...state,
+        searchTerms,
+      }
     })
   },
+  deleteSearchTerm: index =>
+    set(state => {
+      let searchTerms = state.searchTerms->Array.filterWithIndex((_, i) => i !== index)
+      WindowBindings.LocalStorage.setItem(
+        "searchTerms",
+        searchTerms->JSON.stringifyAny->Option.getOr(""),
+      )
+      {
+        ...state,
+        searchTerms,
+      }
+    }),
   syntaxFilter: State.defaultSyntaxFilter,
   setSyntaxFilter: syntaxFilter => {
     WindowBindings.LocalStorage.setItem(
