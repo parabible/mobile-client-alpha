@@ -35,6 +35,7 @@ type reference = {book: string, chapter: string}
 type textualEdition = {id: int, abbreviation: string, visible: bool}
 type searchTermDataPoint = {key: string, value: string}
 type searchTerm = {
+  uuid: string,
   inverted: bool,
   data: array<searchTermDataPoint>,
 }

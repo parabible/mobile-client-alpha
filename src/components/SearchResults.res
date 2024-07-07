@@ -162,11 +162,15 @@ module SearchMenu = {
     let searchTerms = Zustand.store->Zustand.SomeStore.use(state => state.searchTerms)
     let deleteSearchTerm = Zustand.store->Zustand.SomeStore.use(state => state.deleteSearchTerm)
     let setSearchTerms = Zustand.store->Zustand.SomeStore.use(state => state.setSearchTerms)
-    let invertSearchTerm = index => 
+    let invertSearchTerm = index =>
       setSearchTerms(
         searchTerms->Array.mapWithIndex((term, i) => {
           if i == index {
-            let term: Zustand.searchTerm = {inverted: !term.inverted, data: term.data}
+            let term: Zustand.searchTerm = {
+              uuid: term.uuid,
+              inverted: !term.inverted,
+              data: term.data,
+            }
             term
           } else {
             term
@@ -233,7 +237,7 @@ module SearchMenu = {
             {searchTerms
             ->Array.mapWithIndex((term, i) => {
               <SearchTermItem
-                key={Zustand.serializeSearchTerms([term])}
+                key={term.uuid}
                 term={term}
                 invertSearchTerm={_ => invertSearchTerm(i)}
                 editSearchTerm={_ => ()}
@@ -348,6 +352,7 @@ let make = () => {
       setResultsCount(_ => 0)
       setTextualEditionsToDisplay(_ => [])
     } else if searchTerms->Array.length > 0 && textualEditionAbbreviations != "" {
+      serializedSearchTerms->Console.log
       setCurrentMode(_ => Loading)
       let _ = getSearchResults(
         ~serializedSearchTerms,

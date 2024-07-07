@@ -113,15 +113,26 @@ let make = () => {
     ->Option.map(wi => wi.value)
     ->Option.getOr("")
   let addSearch = () => {
-    addSearchTerm(
-      {
+    let searchTerm: Zustand.searchTerm = switch currentMode {
+    | View => {
+        uuid: WindowBindings.randomUUID(),
         inverted: false,
-        data: [{
-          key: "lexeme",
-          value: lexeme,
-        }],
-      },
-    )
+        data: [
+          {
+            key: "lexeme",
+            value: lexeme,
+          },
+        ],
+      }
+    | CreateSearchTerm => {
+        uuid: WindowBindings.randomUUID(),
+        inverted: false,
+        data: currentWordInfo
+        ->Array.filterWithIndex((_, i) => checkedDataPoints->Array.get(i)->Option.getOr(false))
+        ->Array.map(wordInfoToDataPoint),
+      }
+    }
+    addSearchTerm(searchTerm)
     setShowSearchResults(true)
     hideWordInfo()
   }
