@@ -222,7 +222,7 @@ module SearchMenu = {
               let logI = _ => i->Int.toString->Console.log
 
               <SearchTermItem
-                key={i->Int.toString}
+                key={Zustand.serializeSearchTerms([term])}
                 term={term}
                 invertSearchTerm={logI}
                 editSearchTerm={logI}
