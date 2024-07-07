@@ -88,16 +88,18 @@ let make = () => {
 
   React.useEffect(() => {
     if showWordInfo {
-      let _ = getWordInfo(selectedWord.id, selectedWord.moduleId)->Promise.then(data => {
-        switch data {
-        | Belt.Result.Error(e) => e->Console.error
-        | Belt.Result.Ok(result) => {
-            setCheckedDataPoints(_ => result.data->Array.map(_ => false))
-            setCurrentWordInfo(_ => result.data)
+      ignore(
+        getWordInfo(selectedWord.id, selectedWord.moduleId)->Promise.then(data => {
+          switch data {
+          | Belt.Result.Error(e) => e->Console.error
+          | Belt.Result.Ok(result) => {
+              setCheckedDataPoints(_ => result.data->Array.map(_ => false))
+              setCurrentWordInfo(_ => result.data)
+            }
           }
-        }
-        Promise.resolve()
-      })
+          Promise.resolve()
+        }),
+      )
     }
     None
   }, [showWordInfo])

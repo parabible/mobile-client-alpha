@@ -203,9 +203,7 @@ module SearchMenu = {
               })}
               buttons={["OK"]}
               onDidDismiss={eventDetail =>
-                setSyntaxFilter(
-                  Store.syntaxFilterStringToVariant(eventDetail.detail.data.values),
-                )}
+                setSyntaxFilter(Store.syntaxFilterStringToVariant(eventDetail.detail.data.values))}
             />
             <IonItem button={true} id="book-filter-trigger-alert">
               <IonIcon icon={IonIcons.filter} slot="start" />
@@ -225,9 +223,7 @@ module SearchMenu = {
               })}
               buttons={["OK"]}
               onDidDismiss={eventDetail =>
-                setCorpusFilter(
-                  Store.corpusFilterStringToVariant(eventDetail.detail.data.values),
-                )}
+                setCorpusFilter(Store.corpusFilterStringToVariant(eventDetail.detail.data.values))}
             />
           </IonItemGroup>
           <IonItemGroup>
@@ -354,51 +350,53 @@ let make = () => {
     } else if searchTerms->Array.length > 0 && textualEditionAbbreviations != "" {
       serializedSearchTerms->Console.log
       setCurrentMode(_ => Loading)
-      let _ = getSearchResults(
-        ~serializedSearchTerms,
-        ~syntaxFilter,
-        ~corpusFilter,
-        ~textualEditionAbbreviations,
-        ~pageNumber,
-        ~pageSize=pageSizeConstant,
-      )->Promise.then(results => {
-        switch results {
-        | Belt.Result.Error(e) => {
-            e->Console.error
-            setMatchingText(_ => None)
-            setCurrentMode(_ => Error)
-          }
-        | Belt.Result.Ok(results) => {
-            let columnHasData =
-              results.matchingText
-              ->Array.at(0)
-              ->Option.getOr([])
-              ->Array.mapWithIndex(
-                (_, i) => {
-                  results.matchingText->Array.some(
-                    row => row->Array.get(i)->Option.getOr([])->Array.length > 0,
-                  )
-                },
-              )
-            let pluckColumns = (row, columns) =>
-              row->Array.filterWithIndex((_, i) => columns[i]->Option.getOr(false))
-            let newTextualEditionsToDisplay = pluckColumns(enabledTextualEditions, columnHasData)
-            setResultsCount(_ => results.count)
-            setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
-            setMatchingText(
-              _ => Some(results.matchingText->Array.map(row => row->pluckColumns(columnHasData))),
-            )
-
-            // scroll to top
-            switch ref.current {
-            | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y=0, ~duration=300)
-            | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
+      ignore(
+        getSearchResults(
+          ~serializedSearchTerms,
+          ~syntaxFilter,
+          ~corpusFilter,
+          ~textualEditionAbbreviations,
+          ~pageNumber,
+          ~pageSize=pageSizeConstant,
+        )->Promise.then(results => {
+          switch results {
+          | Belt.Result.Error(e) => {
+              e->Console.error
+              setMatchingText(_ => None)
+              setCurrentMode(_ => Error)
             }
-            setCurrentMode(_ => Ready)
+          | Belt.Result.Ok(results) => {
+              let columnHasData =
+                results.matchingText
+                ->Array.at(0)
+                ->Option.getOr([])
+                ->Array.mapWithIndex(
+                  (_, i) => {
+                    results.matchingText->Array.some(
+                      row => row->Array.get(i)->Option.getOr([])->Array.length > 0,
+                    )
+                  },
+                )
+              let pluckColumns = (row, columns) =>
+                row->Array.filterWithIndex((_, i) => columns[i]->Option.getOr(false))
+              let newTextualEditionsToDisplay = pluckColumns(enabledTextualEditions, columnHasData)
+              setResultsCount(_ => results.count)
+              setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
+              setMatchingText(
+                _ => Some(results.matchingText->Array.map(row => row->pluckColumns(columnHasData))),
+              )
+
+              // scroll to top
+              switch ref.current {
+              | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y=0, ~duration=300)
+              | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
+              }
+              setCurrentMode(_ => Ready)
+            }
           }
-        }
-        Promise.resolve()
-      })
+          Promise.resolve()
+        }),
+      )
     }
     None
   }, (serializedSearchTerms, syntaxFilter, corpusFilter, textualEditionAbbreviations, pageNumber))

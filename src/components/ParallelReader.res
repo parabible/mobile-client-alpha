@@ -97,57 +97,60 @@ let make = (
 
   React.useEffect2(() => {
     if enabledTextualEditions->Js.Array.length > 0 {
-      let _ = getChapterData(reference, enabledTextualEditions)->Promise.then(data => {
-        switch data {
-        | Belt.Result.Error(e) => e->Console.error
-        | Belt.Result.Ok(data) => {
-            let columnHasData =
-              data
-              ->Array.at(0)
-              ->Option.getOr([])
-              ->Array.mapWithIndex(
-                (_, i) => {
-                  let onlyColumnI = data->Array.map(row => row[i]->Option.getOr(None))
-                  onlyColumnI->Array.some(t => Option.isSome(t))
-                },
-              )
-            let newTextualEditionsToDisplay =
-              enabledTextualEditions->Array.filterWithIndex(
-                (_, i) => columnHasData[i]->Option.getOr(false),
-              )
-            setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
-            let newChapterData =
-              data->Array.map(
-                row => row->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false)),
-              )
-            setChapterData(_ => newChapterData)
-            // let y = switch buttonRef.current {
-            // | Value(node) => {
-            //     // top of the button
-            //     let rect = node->Webapi.Dom.Element.getBoundingClientRect
-            //     rect["height"]
-            //     0
-            //   }
-            // | Null | Undefined => 0
-            // }
-            // y->Console.log
-            // |Value(node) => {
-            //   // bottom of the button
-            //   let rect = node->Webapi.Dom.Element.getBoundingClientRect->Webapi.Dom.Element.getBoundingClientRect
-            //   rect["bottom"]
-            // }
-            // |Null|Undefined => 0
-            let y = 0
+      ignore(
+        getChapterData(reference, enabledTextualEditions)->Promise.then(data => {
+          switch data {
+          | Belt.Result.Error(e) => e->Console.error
+          | Belt.Result.Ok(data) => {
+              let columnHasData =
+                data
+                ->Array.at(0)
+                ->Option.getOr([])
+                ->Array.mapWithIndex(
+                  (_, i) => {
+                    let onlyColumnI = data->Array.map(row => row[i]->Option.getOr(None))
+                    onlyColumnI->Array.some(t => Option.isSome(t))
+                  },
+                )
+              let newTextualEditionsToDisplay =
+                enabledTextualEditions->Array.filterWithIndex(
+                  (_, i) => columnHasData[i]->Option.getOr(false),
+                )
+              setTextualEditionsToDisplay(_ => newTextualEditionsToDisplay)
+              let newChapterData =
+                data->Array.map(
+                  row =>
+                    row->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false)),
+                )
+              setChapterData(_ => newChapterData)
+              // let y = switch buttonRef.current {
+              // | Value(node) => {
+              //     // top of the button
+              //     let rect = node->Webapi.Dom.Element.getBoundingClientRect
+              //     rect["height"]
+              //     0
+              //   }
+              // | Null | Undefined => 0
+              // }
+              // y->Console.log
+              // |Value(node) => {
+              //   // bottom of the button
+              //   let rect = node->Webapi.Dom.Element.getBoundingClientRect->Webapi.Dom.Element.getBoundingClientRect
+              //   rect["bottom"]
+              // }
+              // |Null|Undefined => 0
+              let y = 0
 
-            // scroll to top
-            switch contentRef.current {
-            | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y, ~duration=300)
-            | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
+              // scroll to top
+              switch contentRef.current {
+              | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y, ~duration=300)
+              | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
+              }
             }
           }
-        }
-        Promise.resolve()
-      })
+          Promise.resolve()
+        }),
+      )
     }
     None
   }, (serializedReference, serializedTextualEditionsToDisplay))
