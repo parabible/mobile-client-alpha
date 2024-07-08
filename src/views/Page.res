@@ -22,23 +22,21 @@ let make = () => {
     <IonHeader>
       <IonToolbar>
         <IonButtons slot="start">
-          <IonButton
-            shape=#round onClick={() => IonicFunctions.menuController.\"open"("book-selector")}>
-            <IonIcon slot="icon-only" icon={IonIcons.library} />
-          </IonButton>
           <IonButton shape=#round onClick={() => goToAdjacentChapter(false)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronLeft />
           </IonButton>
-        </IonButtons>
-        <IonTitle>
-          <div style={{textAlign: "center"}}>
+          <IonButton
+            shape=#round
+            size=#large
+            style={ReactDOM.Style.make(~height="48px", ())}
+            onClick={() => IonicFunctions.menuController.\"open"("book-selector")}>
             {`${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string}
-          </div>
-        </IonTitle>
-        <IonButtons slot="end">
+          </IonButton>
           <IonButton shape=#round onClick={() => goToAdjacentChapter(true)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronRight />
           </IonButton>
+        </IonButtons>
+        <IonButtons slot="end">
           <IonButton
             shape=#round onClick={() => IonicFunctions.menuController.\"open"("textualEditions")}>
             <IonIcon slot="icon-only" icon={IonIcons.apps} />

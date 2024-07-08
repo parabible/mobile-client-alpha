@@ -174,6 +174,7 @@ module IonButton = {
     ~shape: buttonShape=?,
     ~size: buttonSize=?,
     ~fill: buttonFill=?,
+    ~style: ReactDOM.Style.t=?,
     ~children: React.element=?,
   ) => React.element = "IonButton"
 }
