@@ -145,11 +145,11 @@ let refreshTextualEditions = (textualEditions, setTextualEditions) => {
               // exclude any textual editions that are not in the new data
               let oldTextualEditionsWithoutUnknowns =
                 textualEditions->Array.filter(m =>
-                  newTextualEditions->Array.find(t => t.abbreviation == m.abbreviation) != None
+                  newTextualEditions->Array.find(t => t.abbreviation == m.abbreviation && t.id == m.id) != None
                 )
               let brandNewTextualEditions =
                 newTextualEditions->Array.filter(m =>
-                  textualEditions->Array.find(t => t.abbreviation == m.abbreviation) == None
+                  textualEditions->Array.find(t => t.abbreviation == m.abbreviation && t.id == m.id) == None
                 )
               let combinedTextualEditions =
                 oldTextualEditionsWithoutUnknowns->Array.concat(brandNewTextualEditions)
