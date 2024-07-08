@@ -1,21 +1,5 @@
 open IonicBindings
 
-let decodeTextualEditions = Json.Decode.object(container =>
-  {
-    "data": container.required(
-      "data",
-      Json.Decode.array(
-        Json.Decode.object(field =>
-          {
-            "moduleId": field.required("moduleId", Json.Decode.int),
-            "abbreviation": field.required("abbreviation", Json.Decode.string),
-          }
-        ),
-      ),
-    ),
-  }
-)
-
 @react.component
 let make = () => {
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
@@ -50,38 +34,6 @@ let make = () => {
     event.detail.complete()
     ()
   }
-
-  React.useEffect0(() => {
-    let url = "https://dev.parabible.com/api/v2/module"
-
-    ignore(
-      Fetch.fetch(url, {method: #GET})
-      ->Promise.then(response => {
-        response->Fetch.Response.json
-      })
-      ->Promise.then(data => {
-        let d = data->Json.decode(decodeTextualEditions)
-        switch d {
-        | Belt.Result.Error(e) => e->Console.error
-        | Belt.Result.Ok(d) => {
-            let mappedTextualEditions = d["data"]->Array.map(
-              m => {
-                let t: State.textualEdition = {
-                  id: m["moduleId"],
-                  abbreviation: m["abbreviation"],
-                  visible: State.defaultEnabledTextualEditions->Array.includes(m["abbreviation"])
-                }
-                t
-              },
-            )
-            setTextualEditions(mappedTextualEditions)
-          }
-        }
-        Promise.resolve()
-      }),
-    )
-    None
-  })
 
   <IonMenu menuId="textualEditions" side="end" contentId="main" \"type"="overlay">
     <IonContent>

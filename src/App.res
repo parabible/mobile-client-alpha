@@ -17,8 +17,17 @@ IonicFunctions.setupIonicReact()
 
 @react.component
 let make = () => {
+  let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
+  let setTextualEditions = Store.store->Store.MobileClient.use(state => {
+    state.setTextualEditions
+  })
+
+  React.useEffect0(() => {
+    State.refreshTextualEditions(textualEditions, setTextualEditions)
+    None
+  })
+
   <IonApp>
-    // <State.Provider value={State.initialState}>
     <IonReactRouter>
       <BookSelectorMenu />
       <TextualEditionsMenu />
@@ -31,6 +40,5 @@ let make = () => {
         </Route>
       </IonRouterOutlet>
     </IonReactRouter>
-    // </State.Provider>
   </IonApp>
 }
