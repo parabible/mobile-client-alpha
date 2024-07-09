@@ -8,30 +8,10 @@ type teMatch = array<TextObject.textObject>
 
 type resultRow = array<teMatch>
 
-type matchingWord = {textualEditionId: int, wid: int}
-
-type warmWord = {textualEditionId: int, wids: array<int>}
-
 type termSearchResult = {
   count: int,
   matchingText: array<resultRow>,
-  matchingWords: array<matchingWord>,
-  warmWords: array<warmWord>,
 }
-
-let decodeMatchingWords = Json.Decode.array(
-  Json.Decode.object(field => {
-    textualEditionId: field.required("moduleId", Json.Decode.int),
-    wid: field.required("wid", Json.Decode.int),
-  }),
-)
-
-let decodeWarmWords = Json.Decode.array(
-  Json.Decode.object(field => {
-    textualEditionId: field.required("moduleId", Json.Decode.int),
-    wids: field.required("wids", Json.Decode.array(Json.Decode.int)),
-  }),
-)
 
 let decodeTermSearchResult = Json.Decode.object(field => {
   count: field.required("count", Json.Decode.int),
@@ -39,8 +19,6 @@ let decodeTermSearchResult = Json.Decode.object(field => {
     "matchingText",
     Json.Decode.array(Json.Decode.array(Json.Decode.array(TextObject.decodeTextObject))),
   ),
-  matchingWords: field.required("matchingWords", decodeMatchingWords),
-  warmWords: field.required("warmWords", decodeWarmWords),
 })
 
 let getUrl = (

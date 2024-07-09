@@ -1,8 +1,11 @@
+type wordTemperature = Cold | Warm | Hot
+
 type wordObject = {
   wid: int,
   text: string,
   leader: option<string>,
   trailer: option<string>,
+  temp: option<wordTemperature>,
 }
 
 type wordArray = array<wordObject>
@@ -16,12 +19,22 @@ type textObject = {
   wordArray: wordArray,
 }
 
+let decodeTemp = Json.Decode.custom(value =>
+  switch value {
+  | String("") => Cold
+  | String("warm") => Warm
+  | String("hot") => Hot
+  | _ => Cold
+  }
+)
+
 let decodeWordArray = Json.Decode.array(
   Json.Decode.object(field => {
     wid: field.required("wid", Json.Decode.int),
     text: field.required("text", Json.Decode.string),
     leader: field.optional("leader", Json.Decode.string),
     trailer: field.optional("trailer", Json.Decode.string),
+    temp: field.optional("temp", decodeTemp),
   }),
 )
 
@@ -66,12 +79,12 @@ module WordNode = {
       setShowWordInfo(true)
     }
 
-    let style: JsxDOM.style = if (
-      selectedWord.id == wordPart.wid && selectedWord.moduleId == textualEditionId
-    ) {
-      {color: "var(--ion-color-primary)"}
-    } else {
-      {}
+    let isSelecterd = selectedWord.id == wordPart.wid && selectedWord.moduleId == textualEditionId
+    let style: JsxDOM.style = switch (isSelecterd, wordPart.temp) {
+    | (true, _) => {color: "var(--ion-color-primary)"}
+    | (false, Some(Hot)) => {color: "var(--ion-color-danger)"}
+    | (false, Some(Warm)) => {color: "var(--ion-color-warning)"}
+    | (false, _) => {}
     }
 
     <>
