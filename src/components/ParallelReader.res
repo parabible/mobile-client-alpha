@@ -160,14 +160,16 @@ let make = (
     setReference(newReference)
   }
 
-  <div>
+  <div className="parallel-reader">
     <button
       ref={ReactDOM.Ref.domRef(buttonRef)}
       onClick={_ => goToAdjacentChapter(false)}
       className="chapter-button">
       {"Previous Chapter"->React.string}
     </button>
-    <VerseTable chapterData={chapterData} textualEditions={textualEditionsToDisplay} />
+    <div className="content">
+      <VerseTable chapterData={chapterData} textualEditions={textualEditionsToDisplay} />
+    </div>
     <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
       {"Next Chapter"->React.string}
     </button>
