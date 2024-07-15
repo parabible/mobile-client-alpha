@@ -302,6 +302,13 @@ module IonRadio = {
     "IonRadio"
 }
 
+module IonProgressBar = {
+  type progressBarType = [#determinate | #indeterminate]
+  @module("@ionic/react") @react.component
+  external make: (~\"type": progressBarType, ~color: ionColor=?, ~value: float=?) => React.element =
+    "IonProgressBar"
+}
+
 module IonIcons = {
   @module("ionicons/icons") external library: React.element = "library"
   @module("ionicons/icons") external settings: React.element = "settings"

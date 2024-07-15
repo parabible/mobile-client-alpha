@@ -79,29 +79,38 @@ module VerseTable = {
 }
 
 @react.component
-let make = (
-  ~reference: State.reference,
-  ~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>,
-) => {
+let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
   let buttonRef = React.useRef(Nullable.null)
   let (chapterData, setChapterData) = React.useState(_ => [])
   let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
+  let targetReference = Store.store->Store.MobileClient.use(state => state.targetReference)
+  let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
+  let setChapterLoadingState =
+    Store.store->Store.MobileClient.use(state => state.setChapterLoadingState)
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
   let (textualEditionsToDisplay, setTextualEditionsToDisplay) = React.useState(_ => [])
 
   // useEffect can't take arrays and it doesn't correctly memoize objects, so serialize deps
-  let serializedReference = `${reference.book} ${reference.chapter}`
+  let serializedReference = `${targetReference.book} ${targetReference.chapter}`
   let serializedTextualEditionsToDisplay =
     enabledTextualEditions->Array.map(m => string_of_int(m.id))->Array.join(",")
 
   React.useEffect2(() => {
+    let fetchedRef = targetReference
     if enabledTextualEditions->Js.Array.length > 0 {
+      setChapterLoadingState(Loading)
       ignore(
-        getChapterData(reference, enabledTextualEditions)->Promise.then(data => {
+        getChapterData(targetReference, enabledTextualEditions)
+        ->Promise.then(data => {
           switch data {
-          | Belt.Result.Error(e) => e->Console.error
-          | Belt.Result.Ok(data) => {
+          | Belt.Result.Error(e) => {
+              e->Console.error
+              setChapterLoadingState(Error)
+            }
+          | Belt.Result.Ok(data) =>
+            // if target ref is no longer the same, don't update the state
+            if targetReference == fetchedRef {
               let columnHasData =
                 data
                 ->Array.at(0)
@@ -123,6 +132,8 @@ let make = (
                     row->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false)),
                 )
               setChapterData(_ => newChapterData)
+              setChapterLoadingState(Ready)
+              setReference(targetReference)
               // let y = switch buttonRef.current {
               // | Value(node) => {
               //     // top of the button
@@ -149,6 +160,10 @@ let make = (
             }
           }
           Promise.resolve()
+        })
+        ->Promise.catch(_ => {
+          setChapterLoadingState(Error)
+          Promise.resolve()
         }),
       )
     }
@@ -156,8 +171,8 @@ let make = (
   }, (serializedReference, serializedTextualEditionsToDisplay))
 
   let goToAdjacentChapter = forward => {
-    let newReference = Books.getAdjacentChapter(reference, forward)
-    setReference(newReference)
+    let newReference = Books.getAdjacentChapter(targetReference, forward)
+    setTargetReference(newReference)
   }
 
   <div className="parallel-reader">

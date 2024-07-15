@@ -44,7 +44,7 @@ type mode = Book | Chapter
 let make = () => {
   // let inputRef = React.useRef(Js.Nullable.null);
   let (currentMode, setCurrentMode) = React.useState(_ => Book)
-  let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
+  let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
   let (searchValue, setSearchValue) = React.useState(_ => "")
   let filterIsApplied = searchValue->String.length > 0
   let (selectedBook, setSelectedBookState) = React.useState(_ => None)
@@ -59,7 +59,7 @@ let make = () => {
   let onChapterSelect = chapter => {
     switch selectedBook {
     | Some(book) => {
-        setReference({book, chapter: chapter->Int.toString})
+        setTargetReference({book, chapter: chapter->Int.toString})
         IonicFunctions.menuController.close("book-selector")
       }
     | _ => {

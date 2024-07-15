@@ -17,3 +17,22 @@ td.verseText {
 .word:hover {
   color: #005a9e
 }
+
+.target-reference {
+	position: absolute;
+	color: var(--ion-color-primary);
+	font-size: 0.6em;
+	bottom: 0;
+	transition: all 0.3s ease-in-out;
+}
+
+.target-reference.error {
+	color: var(--ion-color-danger)
+}
+
+.target-reference.ready {
+	background-color: transparent;
+	color: black;
+	font-size: 0.9em;
+	opacity: 0;
+}

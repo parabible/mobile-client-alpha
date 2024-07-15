@@ -32,6 +32,10 @@ module AppStore = {
     setCorpusFilter: State.corpusFilter => unit,
     reference: State.reference,
     setReference: State.reference => unit,
+    targetReference: State.reference,
+    setTargetReference: State.reference => unit,
+    chapterLoadingState: State.chapterLoadingState,
+    setChapterLoadingState: State.chapterLoadingState => unit,
     showWordInfo: bool,
     setShowWordInfo: bool => unit,
     showSearchResults: bool,
@@ -121,6 +125,23 @@ let store = MobileClient.create(set => {
       reference,
     })
   },
+  targetReference: State.initialReference,
+  setTargetReference: reference => {
+    WindowBindings.LocalStorage.setItem(
+      "targetReference",
+      reference->JSON.stringifyAny->Option.getOr(""),
+    )
+    set(state => {
+      ...state,
+      targetReference: reference,
+    })
+  },
+  chapterLoadingState: State.Loading,
+  setChapterLoadingState: newLoadingState =>
+    set(state => {
+      ...state,
+      chapterLoadingState: newLoadingState,
+    }),
   showWordInfo: false,
   setShowWordInfo: show =>
     set(state => {

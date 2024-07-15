@@ -20,6 +20,8 @@ let defaultCorpusFilter: corpusFilter = None
 
 type reference = {book: string, chapter: string}
 
+type chapterLoadingState = Ready | Loading | Error
+
 type textualEdition = {id: int, abbreviation: string, visible: bool}
 
 type searchTermDataPoint = {key: string, value: string}

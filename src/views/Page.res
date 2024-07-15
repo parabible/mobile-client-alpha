@@ -1,22 +1,21 @@
 // module IonButton = IonicBindings.IonButton
 open IonicBindings
 
+let referenceToElement = (reference: State.reference) => {
+  `${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string
+}
+
 @react.component
 let make = () => {
   let ref = React.useRef(Nullable.null)
-  // let state = React.useContext(State.context)
-  let reference = Store.store->Store.MobileClient.use(state => {
-    let r: State.reference = {
-      book: state.reference.book,
-      chapter: state.reference.chapter,
-    }
-    r
-  })
-  let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
+  let reference = Store.store->Store.MobileClient.use(state => state.reference)
+  let targetReference = Store.store->Store.MobileClient.use(state => state.targetReference)
+  let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
   let goToAdjacentChapter = forward => {
-    let newReference = Books.getAdjacentChapter(reference, forward)
-    setReference(newReference)
+    let newReference = Books.getAdjacentChapter(targetReference, forward)
+    setTargetReference(newReference)
   }
+  let chapterLoadingState = Store.store->Store.MobileClient.use(state => state.chapterLoadingState)
 
   <IonPage>
     <IonHeader>
@@ -30,7 +29,15 @@ let make = () => {
             size=#large
             style={ReactDOM.Style.make(~height="48px", ())}
             onClick={() => IonicFunctions.menuController.\"open"("book-selector")}>
-            {`${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string}
+            {referenceToElement(reference)}
+            <div
+              className={"target-reference" ++
+              (targetReference.book == reference.book &&
+                targetReference.chapter == reference.chapter
+                ? " ready"
+                : "") ++ (chapterLoadingState == Error ? " error" : "")}>
+              {referenceToElement(targetReference)}
+            </div>
           </IonButton>
           <IonButton shape=#round onClick={() => goToAdjacentChapter(true)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronRight />
@@ -46,10 +53,15 @@ let make = () => {
           //   <IonIcon slot="icon-only" icon={IonIcons.settings} />
           // </IonButton>
         </IonButtons>
+        {switch chapterLoadingState {
+        | Loading => <IonProgressBar \"type"=#indeterminate />
+        | Error => <IonProgressBar \"type"=#determinate value=1. color={#danger} />
+        | Ready => <> </>
+        }}
       </IonToolbar>
     </IonHeader>
     <IonContent ref={ReactDOM.Ref.domRef(ref)}>
-      <ParallelReader reference={reference} contentRef={ref} />
+      <ParallelReader contentRef={ref} />
       <SearchResults />
       <WordInfo />
     </IonContent>
