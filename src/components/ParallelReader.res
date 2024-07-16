@@ -81,6 +81,8 @@ module VerseTable = {
 @react.component
 let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
   let buttonRef = React.useRef(Nullable.null)
+  let currentlyLoadedRequestId = React.useRef(0)
+  let maxRequestId = React.useRef(0)
   let (chapterData, setChapterData) = React.useState(_ => [])
   let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
   let targetReference = Store.store->Store.MobileClient.use(state => state.targetReference)
@@ -97,7 +99,8 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
     enabledTextualEditions->Array.map(m => string_of_int(m.id))->Array.join(",")
 
   React.useEffect2(() => {
-    let fetchedRef = targetReference
+    maxRequestId.current = maxRequestId.current + 1
+    let requestId = maxRequestId.current
     if enabledTextualEditions->Js.Array.length > 0 {
       setChapterLoadingState(Loading)
       ignore(
@@ -109,8 +112,8 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
               setChapterLoadingState(Error)
             }
           | Belt.Result.Ok(data) =>
-            // if target ref is no longer the same, don't update the state
-            if targetReference == fetchedRef {
+            // if data is older than currently loaded data, don't update the state
+            if requestId > currentlyLoadedRequestId.current {
               let columnHasData =
                 data
                 ->Array.at(0)
@@ -134,6 +137,8 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
               setChapterData(_ => newChapterData)
               setChapterLoadingState(Ready)
               setReference(targetReference)
+              currentlyLoadedRequestId.current = requestId
+              
               // let y = switch buttonRef.current {
               // | Value(node) => {
               //     // top of the button
