@@ -138,28 +138,10 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
               setChapterLoadingState(Ready)
               setReference(targetReference)
               currentlyLoadedRequestId.current = requestId
-              
-              // let y = switch buttonRef.current {
-              // | Value(node) => {
-              //     // top of the button
-              //     let rect = node->Webapi.Dom.Element.getBoundingClientRect
-              //     rect["height"]
-              //     0
-              //   }
-              // | Null | Undefined => 0
-              // }
-              // y->Console.log
-              // |Value(node) => {
-              //   // bottom of the button
-              //   let rect = node->Webapi.Dom.Element.getBoundingClientRect->Webapi.Dom.Element.getBoundingClientRect
-              //   rect["bottom"]
-              // }
-              // |Null|Undefined => 0
-              let y = 0
 
               // scroll to top
               switch contentRef.current {
-              | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y, ~duration=300)
+              | Value(node) => node->WindowBindings.scrollToPoint(~x=0, ~y=0, ~duration=300)
               | Null | Undefined => "Cannot scroll: ref.current is None"->Console.error
               }
             }
