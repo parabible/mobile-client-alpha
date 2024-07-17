@@ -11,9 +11,34 @@ type ionColor = [
 ]
 
 module IonicFunctions = {
-  @module("@ionic/react") external setupIonicReact: unit => unit = "setupIonicReact"
+  @module("@ionic/react")
+  external setupIonicReact: unit => unit = "setupIonicReact"
+
   type menuController = {\"open": string => unit, close: string => unit}
-  @module("@ionic/core/components") external menuController: menuController = "menuController"
+  @module("@ionic/core/components")
+  external menuController: menuController = "menuController"
+
+  type toastButton = {
+    text?: string,
+    icon?: Jsx.element,
+    side?: [#start | #end],
+    role?: string,
+    cssClass?: array<string>,
+    handler?: unit =>  unit,
+  } 
+  type useIonToast = {
+    header?: string,
+    message: string,
+    duration?: int,
+    position?: [#top | #middle | #bottom],
+    buttons?: array<toastButton>,
+    swipeGesture?: [#vertical]
+  }
+  type dismissable = { dismiss: unit => unit}
+  type presentFunction = useIonToast => unit
+  type dismissFunction = unit => Js.Promise.t<bool>
+  @module("@ionic/react")
+  external useIonToast: unit => (presentFunction, dismissFunction) = "useIonToast"
 }
 
 module IonApp = {
@@ -185,6 +210,7 @@ module IonModal = {
     ~isOpen: bool,
     ~className: string=?,
     ~initialBreakpoint: float=?,
+    ~backdropBreakpoint: float=?,
     ~breakpoints: array<float>=?,
     ~onDidDismiss: unit => unit=?,
     ~children: React.element=?,
