@@ -69,58 +69,58 @@ module CheckableWordInfoItem = {
 
 @react.component
 let make = () => {
-  let (currentWordInfo, setCurrentWordInfo) = React.useState(_ => [])
-  let (checkedDataPoints, setCheckedDataPoints) = React.useState(_ => [])
+  // let (currentWordInfo, setCurrentWordInfo) = React.useState(_ => [])
+  // let (checkedDataPoints, setCheckedDataPoints) = React.useState(_ => [])
   let (presentToast, dismissToast) = IonicFunctions.useIonToast()
-  let (currentMode, setCurrentMode) = React.useState(_ => View)
+  // let (currentMode, setCurrentMode) = React.useState(_ => View)
   let selectedWord = Store.store->Store.MobileClient.use(state => state.selectedWord)
   let showWordInfo = Store.store->Store.MobileClient.use(state => state.showWordInfo)
-  let setShowWordInfo = Store.store->Store.MobileClient.use(state => {
-    state.setShowWordInfo
-  })
-  let hideWordInfo = () => {
-    setCurrentMode(_ => View)
-    setShowWordInfo(false)
-  }
-  let setShowSearchResults = Store.store->Store.MobileClient.use(state => {
-    state.setShowSearchResults
-  })
+  // let setShowWordInfo = Store.store->Store.MobileClient.use(state => {
+  //   state.setShowWordInfo
+  // })
+  // let hideWordInfo = () => {
+  //   setCurrentMode(_ => View)
+  //   setShowWordInfo(false)
+  // }
+  // let setShowSearchResults = Store.store->Store.MobileClient.use(state => {
+  //   state.setShowSearchResults
+  // })
   let addSearchTerm = Store.store->Store.MobileClient.use(state => state.addSearchTerm)
 
-  let lexeme =
-    currentWordInfo
-    ->Array.find(wi => wi.key === "lexeme")
-    ->Option.map(wi => wi.value)
-    ->Option.getOr("")
-  let gloss =
-    currentWordInfo
-    ->Array.find(wi => wi.key === "gloss")
-    ->Option.map(wi => wi.value)
-    ->Option.getOr("")
-  let addSearch = () => {
-    let searchTerm: State.searchTerm = switch currentMode {
-    | View => {
-        uuid: WindowBindings.randomUUID(),
-        inverted: false,
-        data: [
-          {
-            key: "lexeme",
-            value: lexeme,
-          },
-        ],
-      }
-    | CreateSearchTerm => {
-        uuid: WindowBindings.randomUUID(),
-        inverted: false,
-        data: currentWordInfo
-        ->Array.filterWithIndex((_, i) => checkedDataPoints->Array.get(i)->Option.getOr(false))
-        ->Array.map(wordInfoToDataPoint),
-      }
-    }
-    addSearchTerm(searchTerm)
-    setShowSearchResults(true)
-    hideWordInfo()
-  }
+  // let lexeme =
+  //   currentWordInfo
+  //   ->Array.find(wi => wi.key === "lexeme")
+  //   ->Option.map(wi => wi.value)
+  //   ->Option.getOr("")
+  // let gloss =
+  //   currentWordInfo
+  //   ->Array.find(wi => wi.key === "gloss")
+  //   ->Option.map(wi => wi.value)
+  //   ->Option.getOr("")
+  // let addSearch = () => {
+  //   let searchTerm: State.searchTerm = switch currentMode {
+  //   | View => {
+  //       uuid: WindowBindings.randomUUID(),
+  //       inverted: false,
+  //       data: [
+  //         {
+  //           key: "lexeme",
+  //           value: lexeme,
+  //         },
+  //       ],
+  //     }
+  //   | CreateSearchTerm => {
+  //       uuid: WindowBindings.randomUUID(),
+  //       inverted: false,
+  //       data: currentWordInfo
+  //       ->Array.filterWithIndex((_, i) => checkedDataPoints->Array.get(i)->Option.getOr(false))
+  //       ->Array.map(wordInfoToDataPoint),
+  //     }
+  //   }
+  //   addSearchTerm(searchTerm)
+  //   setShowSearchResults(true)
+  //   hideWordInfo()
+  // }
 
   React.useEffect3(() => {
     if showWordInfo {
@@ -129,8 +129,8 @@ let make = () => {
           switch data {
           | Belt.Result.Error(e) => e->Console.error
           | Belt.Result.Ok(result) => {
-              setCheckedDataPoints(_ => result.data->Array.map(_ => false))
-              setCurrentWordInfo(_ => result.data)
+              // setCheckedDataPoints(_ => result.data->Array.map(_ => false))
+              // setCurrentWordInfo(_ => result.data)
               let lexeme =
                 result.data
                 ->Array.find(wi => wi.key === "lexeme")
@@ -147,8 +147,20 @@ let make = () => {
                 duration: 3000,
                 swipeGesture: #vertical,
                 buttons: [
-                  {icon: IonIcons.ellipsisVertical},
-                  {icon: IonIcons.search, handler: addSearch},
+                  // {icon: IonIcons.ellipsisVertical},
+                  {
+                    icon: IonIcons.search,
+                    handler: _ => addSearchTerm({
+                      uuid: WindowBindings.randomUUID(),
+                      inverted: false,
+                      data: [
+                        {
+                          key: "lexeme",
+                          value: lexeme,
+                        },
+                      ],
+                    }),
+                  },
                   {icon: IonIcons.close, role: "cancel"},
                 ],
               })
