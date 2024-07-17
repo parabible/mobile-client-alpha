@@ -32,7 +32,9 @@ module IonicFunctions = {
     duration?: int,
     position?: [#top | #middle | #bottom],
     buttons?: array<toastButton>,
-    swipeGesture?: [#vertical]
+    swipeGesture?: [#vertical],
+    color?: ionColor,
+    onDidDismiss?: unit => unit,
   }
   type dismissable = { dismiss: unit => unit}
   type presentFunction = useIonToast => unit

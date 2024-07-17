@@ -41,6 +41,7 @@ let wordInfoToDataPoint: wordInfoEntry => State.searchTermDataPoint = wi => {
 }
 
 type mode =
+  | None
   | View
   | CreateSearchTerm
 
@@ -67,178 +68,203 @@ module CheckableWordInfoItem = {
   }
 }
 
+let lexemeFromData = data =>
+  data
+  ->Array.find(wi => wi.key === "lexeme")
+  ->Option.map(wi => wi.value)
+  ->Option.getOr("")
+
+let glossFromData = data =>
+  data
+  ->Array.find(wi => wi.key === "gloss")
+  ->Option.map(wi => wi.value)
+  ->Option.getOr("")
+
 @react.component
 let make = () => {
-  // let (currentWordInfo, setCurrentWordInfo) = React.useState(_ => [])
-  // let (checkedDataPoints, setCheckedDataPoints) = React.useState(_ => [])
+  let (currentWordInfo, setCurrentWordInfo) = React.useState(_ => [])
+  let (currentSelectedWord, setCurrentSelectedWord) = React.useState(_ => {
+    let w: State.selectedWord = {id: 0, moduleId: 0}
+    w
+  })
+  let (checkedDataPoints, setCheckedDataPoints) = React.useState(_ => [])
   let (presentToast, dismissToast) = IonicFunctions.useIonToast()
-  // let (currentMode, setCurrentMode) = React.useState(_ => View)
+  let (currentMode, setCurrentMode) = React.useState(_ => None)
   let selectedWord = Store.store->Store.MobileClient.use(state => state.selectedWord)
   let showWordInfo = Store.store->Store.MobileClient.use(state => state.showWordInfo)
-  // let setShowWordInfo = Store.store->Store.MobileClient.use(state => {
-  //   state.setShowWordInfo
-  // })
-  // let hideWordInfo = () => {
-  //   setCurrentMode(_ => View)
-  //   setShowWordInfo(false)
-  // }
+  let setShowWordInfo = Store.store->Store.MobileClient.use(state => {
+    state.setShowWordInfo
+  })
   let setShowSearchResults = Store.store->Store.MobileClient.use(state => {
     state.setShowSearchResults
   })
   let addSearchTerm = Store.store->Store.MobileClient.use(state => state.addSearchTerm)
 
-  // let lexeme =
-  //   currentWordInfo
-  //   ->Array.find(wi => wi.key === "lexeme")
-  //   ->Option.map(wi => wi.value)
-  //   ->Option.getOr("")
-  // let gloss =
-  //   currentWordInfo
-  //   ->Array.find(wi => wi.key === "gloss")
-  //   ->Option.map(wi => wi.value)
-  //   ->Option.getOr("")
-  // let addSearch = () => {
-  //   let searchTerm: State.searchTerm = switch currentMode {
-  //   | View => {
-  //       uuid: WindowBindings.randomUUID(),
-  //       inverted: false,
-  //       data: [
-  //         {
-  //           key: "lexeme",
-  //           value: lexeme,
-  //         },
-  //       ],
-  //     }
-  //   | CreateSearchTerm => {
-  //       uuid: WindowBindings.randomUUID(),
-  //       inverted: false,
-  //       data: currentWordInfo
-  //       ->Array.filterWithIndex((_, i) => checkedDataPoints->Array.get(i)->Option.getOr(false))
-  //       ->Array.map(wordInfoToDataPoint),
-  //     }
-  //   }
-  //   addSearchTerm(searchTerm)
-  //   setShowSearchResults(true)
-  //   hideWordInfo()
-  // }
+  let addSearch = () => {
+    let searchTerm: State.searchTerm = switch currentMode {
+      | None => {
+        uuid: "none",
+        inverted: false,
+        data: [],
+      }
+    | View => {
+        uuid: WindowBindings.randomUUID(),
+        inverted: false,
+        data: [
+          {
+            key: "lexeme",
+            value: lexemeFromData(currentWordInfo),
+          },
+        ],
+      }
+    | CreateSearchTerm => {
+        uuid: WindowBindings.randomUUID(),
+        inverted: false,
+        data: currentWordInfo
+        ->Array.filterWithIndex((_, i) => checkedDataPoints->Array.get(i)->Option.getOr(false))
+        ->Array.map(wordInfoToDataPoint),
+      }
+    }
+    addSearchTerm(searchTerm)
+    setShowSearchResults(true)
+    setCurrentMode(_ => None)
+  }
+
+  let showToastForWordInfo = async data => {
+    let lexeme =
+      data
+      ->Array.find(wi => wi.key === "lexeme")
+      ->Option.map(wi => wi.value)
+      ->Option.getOr("")
+    let gloss =
+      data
+      ->Array.find(wi => wi.key === "gloss")
+      ->Option.map(wi => wi.value)
+      ->Option.getOr("")
+    let _ = await dismissToast()
+    presentToast({
+      message: lexeme ++ " · " ++ gloss,
+      duration: 3000,
+      swipeGesture: #vertical,
+      color: #light,
+      buttons: [
+        {icon: IonIcons.ellipsisVertical, handler: _ => setCurrentMode(_ => View)},
+        {
+          icon: IonIcons.search,
+          handler: _ => {
+            addSearchTerm({
+              uuid: WindowBindings.randomUUID(),
+              inverted: false,
+              data: [
+                {
+                  key: "lexeme",
+                  value: lexeme,
+                },
+              ],
+            })
+            setShowSearchResults(true)
+          },
+        },
+        {icon: IonIcons.close, handler: _ => ignore(dismissToast())},
+      ],
+      onDidDismiss: _ => {
+        "dismiss"->Console.log
+        setShowWordInfo(false)
+      },
+    })
+  }
 
   React.useEffect3(() => {
     if showWordInfo {
-      ignore(
-        getWordInfo(selectedWord.id, selectedWord.moduleId)->Promise.then(async data => {
-          switch data {
-          | Belt.Result.Error(e) => e->Console.error
-          | Belt.Result.Ok(result) => {
-              // setCheckedDataPoints(_ => result.data->Array.map(_ => false))
-              // setCurrentWordInfo(_ => result.data)
-              let lexeme =
-                result.data
-                ->Array.find(wi => wi.key === "lexeme")
-                ->Option.map(wi => wi.value)
-                ->Option.getOr("")
-              let gloss =
-                result.data
-                ->Array.find(wi => wi.key === "gloss")
-                ->Option.map(wi => wi.value)
-                ->Option.getOr("")
-              let _ = await dismissToast()
-              presentToast({
-                message: lexeme ++ " · " ++ gloss,
-                duration: 3000,
-                swipeGesture: #vertical,
-                buttons: [
-                  // {icon: IonIcons.ellipsisVertical},
-                  {
-                    icon: IonIcons.search,
-                    handler: _ => {
-                      addSearchTerm({
-                        uuid: WindowBindings.randomUUID(),
-                        inverted: false,
-                        data: [
-                          {
-                            key: "lexeme",
-                            value: lexeme,
-                          },
-                        ],
-                      })
-                      setShowSearchResults(true)
-                    },
-                  },
-                  {icon: IonIcons.close, role: "cancel"},
-                ],
-              })
+      if (
+        selectedWord.id === currentSelectedWord.id &&
+          selectedWord.moduleId === currentSelectedWord.moduleId
+      ) {
+        // No need to fetch the data again
+        ignore(showToastForWordInfo(currentWordInfo))
+      } else {
+        ignore(
+          getWordInfo(selectedWord.id, selectedWord.moduleId)->Promise.then(data => {
+            switch data {
+            | Belt.Result.Error(e) => e->Console.error
+            | Belt.Result.Ok(result) => {
+                setCheckedDataPoints(_ => result.data->Array.map(_ => false))
+                setCurrentWordInfo(_ => result.data)
+                setCurrentSelectedWord(_ => selectedWord)
+                ignore(showToastForWordInfo(result.data))
+              }
             }
-          }
-          Promise.resolve()
-        }),
-      )
+            Promise.resolve()
+          }),
+        )
+      }
     }
     None
   }, (showWordInfo, selectedWord.id, selectedWord.moduleId))
 
-  <> </>
-  // <IonModal
-  //   className="word-info"
-  //   isOpen={showWordInfo}
-  //   initialBreakpoint={0.11}
-  //   backdropBreakpoint={0.3}
-  //   breakpoints={[0., 0.11, 1.]}
-  //   onDidDismiss={hideWordInfo}>
-  //   <IonContent className="ion-padding">
-  //     <div
-  //       style={{
-  //         display: "flex",
-  //         justifyContent: "space-between",
-  //         alignItems: "center",
-  //         fontSize: "1.3rem",
-  //         fontFamily: "SBL BibLit",
-  //         padding: "0 1rem 0.8rem",
-  //       }}>
-  //       <b> {lexeme->React.string} </b>
-  //       <b> {gloss->React.string} </b>
-  //       <IonButton shape=#round onClick={addSearch}>
-  //         <IonIcon slot="icon-only" icon={IonIcons.search} />
-  //       </IonButton>
-  //     </div>
-  //     <IonList>
-  //       {currentWordInfo
-  //       ->Array.mapWithIndex((wi, i) =>
-  //         <IonItem key={wi.key}>
-  //           {
-  //             let heading = Features.getFeatureValue(wi.key, wi.value)
-  //             let subheading = Features.getFeatureName(wi.key)
-  //             switch currentMode {
-  //             | View => <WordInfoItem heading subheading />
-  //             | CreateSearchTerm =>
-  //               <CheckableWordInfoItem
-  //                 heading
-  //                 subheading
-  //                 isChecked={checkedDataPoints->Array.get(i)->Option.getOr(false)}
-  //                 onCheck={newVal => {
-  //                   setCheckedDataPoints(oldDataPoints => {
-  //                     oldDataPoints->Array.mapWithIndex((val, j) => i === j ? newVal : val)
-  //                   })
-  //                 }}
-  //               />
-  //             }
-  //           }
-  //         </IonItem>
-  //       )
-  //       ->React.array}
-  //     </IonList>
-  //     {switch currentMode {
-  //     | View =>
-  //       <IonButton expand={#full} onClick={_ => setCurrentMode(_ => CreateSearchTerm)}>
-  //         {"Create Custom Search Term"->React.string}
-  //       </IonButton>
-  //     | CreateSearchTerm =>
-  //       <div style={{display: "grid", grid: "auto-flow / 1fr 1fr"}}>
-  //         <IonButton expand={#full} onClick={addSearch}> {"Search"->React.string} </IonButton>
-  //         <IonButton expand={#full} color={#light} onClick={_ => setCurrentMode(_ => View)}>
-  //           {"Cancel"->React.string}
-  //         </IonButton>
-  //       </div>
-  //     }}
-  //   </IonContent>
-  // </IonModal>
+  <IonModal
+    className="word-info"
+    isOpen={currentMode !== None}
+    initialBreakpoint={0.11}
+    breakpoints={[0., 0.11, 1.]}
+    onDidDismiss={_ => setCurrentMode(_ => None)}>
+    <IonContent className="ion-padding">
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          fontSize: "1.3rem",
+          fontFamily: "SBL BibLit",
+          padding: "0 1rem 0.8rem",
+        }}>
+        <b> {currentWordInfo->lexemeFromData->React.string} </b>
+        <b> {currentWordInfo->glossFromData->React.string} </b>
+        <IonButton shape=#round onClick={addSearch}>
+          <IonIcon slot="icon-only" icon={IonIcons.search} />
+        </IonButton>
+      </div>
+      <IonList>
+        {currentWordInfo
+        ->Array.mapWithIndex((wi, i) =>
+          <IonItem key={wi.key}>
+            {
+              let heading = Features.getFeatureValue(wi.key, wi.value)
+              let subheading = Features.getFeatureName(wi.key)
+              switch currentMode {
+              | None => <> </>
+              | View => <WordInfoItem heading subheading />
+              | CreateSearchTerm =>
+                <CheckableWordInfoItem
+                  heading
+                  subheading
+                  isChecked={checkedDataPoints->Array.get(i)->Option.getOr(false)}
+                  onCheck={newVal => {
+                    setCheckedDataPoints(oldDataPoints => {
+                      oldDataPoints->Array.mapWithIndex((val, j) => i === j ? newVal : val)
+                    })
+                  }}
+                />
+              }
+            }
+          </IonItem>
+        )
+        ->React.array}
+      </IonList>
+      {switch currentMode {
+      | None => <> </>
+      | View =>
+        <IonButton expand={#full} onClick={_ => setCurrentMode(_ => CreateSearchTerm)}>
+          {"Create Custom Search Term"->React.string}
+        </IonButton>
+      | CreateSearchTerm =>
+        <div style={{display: "grid", grid: "auto-flow / 1fr 1fr"}}>
+          <IonButton expand={#full} onClick={addSearch}> {"Search"->React.string} </IonButton>
+          <IonButton expand={#full} color={#light} onClick={_ => setCurrentMode(_ => View)}>
+            {"Cancel"->React.string}
+          </IonButton>
+        </div>
+      }}
+    </IonContent>
+  </IonModal>
 }
