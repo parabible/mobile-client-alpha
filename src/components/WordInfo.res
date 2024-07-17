@@ -82,9 +82,9 @@ let make = () => {
   //   setCurrentMode(_ => View)
   //   setShowWordInfo(false)
   // }
-  // let setShowSearchResults = Store.store->Store.MobileClient.use(state => {
-  //   state.setShowSearchResults
-  // })
+  let setShowSearchResults = Store.store->Store.MobileClient.use(state => {
+    state.setShowSearchResults
+  })
   let addSearchTerm = Store.store->Store.MobileClient.use(state => state.addSearchTerm)
 
   // let lexeme =
@@ -150,16 +150,19 @@ let make = () => {
                   // {icon: IonIcons.ellipsisVertical},
                   {
                     icon: IonIcons.search,
-                    handler: _ => addSearchTerm({
-                      uuid: WindowBindings.randomUUID(),
-                      inverted: false,
-                      data: [
-                        {
-                          key: "lexeme",
-                          value: lexeme,
-                        },
-                      ],
-                    }),
+                    handler: _ => {
+                      addSearchTerm({
+                        uuid: WindowBindings.randomUUID(),
+                        inverted: false,
+                        data: [
+                          {
+                            key: "lexeme",
+                            value: lexeme,
+                          },
+                        ],
+                      })
+                      setShowSearchResults(true)
+                    },
                   },
                   {icon: IonIcons.close, role: "cancel"},
                 ],
