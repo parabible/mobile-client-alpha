@@ -68,10 +68,14 @@ let getSearchResults = async (
 }
 
 let getFirstRidForRow = (row: resultRow) =>
-  switch row->Array.at(0)->Option.getOr([])->Array.at(0) {
-  | Some(textObject) => textObject.rid
-  | None => 0
-  }
+  row
+  ->Array.reduce(None, (acc, teMatch) =>
+    switch (acc, teMatch->Array.at(0)) {
+    | (None, Some(textObject)) => Some(textObject.rid)
+    | (_, _) => acc
+    }
+  )
+  ->Option.getOr(0)
 
 module CenteredDiv = {
   @react.component
