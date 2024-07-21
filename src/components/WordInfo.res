@@ -146,7 +146,6 @@ let make = () => {
       message: lexeme ++ " · " ++ gloss,
       duration: 3000,
       swipeGesture: #vertical,
-      color: #light,
       buttons: [
         {icon: IonIcons.ellipsisVertical, handler: _ => setCurrentMode(_ => View)},
         {
