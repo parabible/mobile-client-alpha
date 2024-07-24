@@ -56,7 +56,7 @@ let getAdjacentChapter: (State.reference, bool) => State.reference = (
           switch books->Array.get(bookIndex - 1) {
           | Some(previousBook) => {
               book: previousBook.name,
-              chapter: bookAtIndex.hasPrologue
+              chapter: previousBook.hasPrologue
                 ? previousBook.chapters->Int.toString
                 : (previousBook.chapters - 1)->Int.toString,
             }
