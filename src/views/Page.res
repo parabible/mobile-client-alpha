@@ -1,9 +1,11 @@
 // module IonButton = IonicBindings.IonButton
 open IonicBindings
 
-let referenceToElement = (reference: State.reference) => {
-  `${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string
-}
+let referenceToElement = (reference: State.reference) =>
+  switch reference.chapter == "0" {
+  | true => `${Books.getBookAbbreviation(reference.book)} Pr.`->React.string
+  | false => `${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string
+  }
 
 @react.component
 let make = () => {
