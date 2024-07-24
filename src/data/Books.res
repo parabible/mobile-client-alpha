@@ -57,8 +57,8 @@ let getAdjacentChapter: (State.reference, bool) => State.reference = (
           | Some(previousBook) => {
               book: previousBook.name,
               chapter: previousBook.hasPrologue
-                ? previousBook.chapters->Int.toString
-                : (previousBook.chapters - 1)->Int.toString,
+                ? (previousBook.chapters - 1)->Int.toString
+                : previousBook.chapters->Int.toString,
             }
           | None => {
               "Something went wrong identifying this book."->Console.error
