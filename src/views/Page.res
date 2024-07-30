@@ -1,5 +1,8 @@
 // module IonButton = IonicBindings.IonButton
 open IonicBindings
+%%raw(`
+import './Page.css';
+`)
 
 let referenceToElement = (reference: State.reference) =>
   switch reference.chapter == "0" {
@@ -21,9 +24,9 @@ let make = () => {
 
   <IonPage>
     <IonHeader>
-      <IonToolbar>
+      <IonToolbar color={#light}>
         <IonButtons slot="start">
-          <IonButton shape=#round onClick={() => goToAdjacentChapter(false)}>
+          <IonButton className="adjacentChapterButton" shape=#round onClick={() => goToAdjacentChapter(false)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronLeft />
           </IonButton>
           <IonButton
@@ -41,7 +44,7 @@ let make = () => {
               {referenceToElement(targetReference)}
             </div>
           </IonButton>
-          <IonButton shape=#round onClick={() => goToAdjacentChapter(true)}>
+          <IonButton className="adjacentChapterButton" shape=#round onClick={() => goToAdjacentChapter(true)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronRight />
           </IonButton>
         </IonButtons>

@@ -24,8 +24,8 @@ module IonicFunctions = {
     side?: [#start | #end],
     role?: string,
     cssClass?: array<string>,
-    handler?: unit =>  unit,
-  } 
+    handler?: unit => unit,
+  }
   type useIonToast = {
     header?: string,
     message: string,
@@ -36,7 +36,7 @@ module IonicFunctions = {
     color?: ionColor,
     onDidDismiss?: unit => unit,
   }
-  type dismissable = { dismiss: unit => unit}
+  type dismissable = {dismiss: unit => unit}
   type presentFunction = useIonToast => unit
   type dismissFunction = unit => Js.Promise.t<bool>
   @module("@ionic/react")
@@ -91,7 +91,7 @@ module IonContent = {
 
 module IonToolbar = {
   @module("@ionic/react") @react.component
-  external make: (~children: React.element) => React.element = "IonToolbar"
+  external make: (~color: ionColor=?, ~children: React.element) => React.element = "IonToolbar"
 }
 
 module IonTitle = {
@@ -202,6 +202,7 @@ module IonButton = {
     ~size: buttonSize=?,
     ~fill: buttonFill=?,
     ~style: ReactDOM.Style.t=?,
+    ~className: string=?,
     ~children: React.element=?,
   ) => React.element = "IonButton"
 }

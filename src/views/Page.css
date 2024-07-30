@@ -1,0 +1,4 @@
+ion-button.adjacentChapterButton {
+    --color: var(--ion-color-primary) !important;
+    --color-hover: var(--ion-color-primary) !important;
+}

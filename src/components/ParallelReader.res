@@ -163,17 +163,17 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
   }
 
   <div className="parallel-reader">
-    <button
-      ref={ReactDOM.Ref.domRef(buttonRef)}
-      onClick={_ => goToAdjacentChapter(false)}
-      className="chapter-button">
-      {"Previous Chapter"->React.string}
-    </button>
+    // <button
+    //   ref={ReactDOM.Ref.domRef(buttonRef)}
+    //   onClick={_ => goToAdjacentChapter(false)}
+    //   className="chapter-button">
+    //   {"Previous Chapter"->React.string}
+    // </button>
     <div className="content">
       <VerseTable chapterData={chapterData} textualEditions={textualEditionsToDisplay} />
     </div>
-    <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
-      {"Next Chapter"->React.string}
-    </button>
+    // <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
+    //   {"Next Chapter"->React.string}
+    // </button>
   </div>
 }
