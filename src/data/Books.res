@@ -37,69 +37,40 @@ let allBooks = switch booksList {
 
 let books = allBooks->Array.filterMap(b => b)
 
+type bookChapterPair = {
+  book: string,
+  chapter: string,
+}
+let allChapters: array<bookChapterPair> =
+  books
+  ->Array.map(b =>
+    (
+      b.hasPrologue ? Belt.Array.range(0, b.chapters - 1) : Belt.Array.range(1, b.chapters)
+    )->Array.map(c => {
+      chapter: c->Int.toString,
+      book: b.name,
+    })
+  )
+  ->Array.flat
+
+allChapters->Console.log
+
 let getAdjacentChapter: (State.reference, bool) => State.reference = (
   reference: State.reference,
   forward,
 ) => {
-  let bookIndex = books->Array.findIndex(b => b.name === reference.book)
-  switch books->Array.get(bookIndex) {
-  | Some(bookAtIndex) => {
-      let newChapter = reference.chapter->Int.fromString->Option.getOr(1) + (forward ? 1 : -1)
-      if newChapter + (bookAtIndex.hasPrologue ? 1 : 0) < 1 {
-        if reference.book === "Genesis" {
-          // Loop back to Revelation (we don't loop to apostolic fathers)
-          {
-            chapter: "22",
-            book: "Revelation",
-          }
-        } else {
-          switch books->Array.get(bookIndex - 1) {
-          | Some(previousBook) => {
-              book: previousBook.name,
-              chapter: previousBook.hasPrologue
-                ? (previousBook.chapters - 1)->Int.toString
-                : previousBook.chapters->Int.toString,
-            }
-          | None => {
-              "Something went wrong identifying this book."->Console.error
-              {
-                book: "Genesis",
-                chapter: "1",
-              }
-            }
-          }
-        }
-      } else if newChapter >= bookAtIndex.chapters - (bookAtIndex.hasPrologue ? 1 : 0) {
-        if bookIndex >= books->Array.length {
-          // Loop back to Genesis
-          {
-            chapter: "1",
-            book: "Genesis",
-          }
-        } else {
-          switch books->Array.get(bookIndex + 1) {
-          | Some(nextBook) => {
-              book: nextBook.name,
-              chapter: nextBook.hasPrologue ? "0" : "1",
-            }
-          | None => {
-              "Something went wrong identifying this book."->Console.error
-              {
-                book: "Genesis",
-                chapter: "1",
-              }
-            }
-          }
-        }
-      } else {
-        {book: reference.book, chapter: newChapter->Int.toString}
-      }
-    }
-  | None => {
-      book: "Genesis",
-      chapter: "1",
-    }
-  }
+  let bcPairIndex =
+    allChapters->Array.findIndex((bcp: bookChapterPair) =>
+      bcp.book === reference.book && bcp.chapter === reference.chapter
+    ) + (forward ? 1 : -1)
+  let functionalBcPairIndex = bcPairIndex >= allChapters->Array.length ? 0 : bcPairIndex
+
+  (allChapters
+  ->Array.at(functionalBcPairIndex)
+  ->Option.getOr({
+    chapter: "1",
+    book: "Genesis",
+  }) :> State.reference)
 }
 
 let getBookAbbreviation = book => {
