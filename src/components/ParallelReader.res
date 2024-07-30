@@ -80,13 +80,11 @@ module VerseTable = {
 
 @react.component
 let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
-  let buttonRef = React.useRef(Nullable.null)
   let currentlyLoadedRequestId = React.useRef(0)
   let maxRequestId = React.useRef(0)
   let (chapterData, setChapterData) = React.useState(_ => [])
   let setReference = Store.store->Store.MobileClient.use(state => state.setReference)
   let targetReference = Store.store->Store.MobileClient.use(state => state.targetReference)
-  let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
   let setChapterLoadingState =
     Store.store->Store.MobileClient.use(state => state.setChapterLoadingState)
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
@@ -157,23 +155,9 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
     None
   }, (serializedReference, serializedTextualEditionsToDisplay))
 
-  let goToAdjacentChapter = forward => {
-    let newReference = Books.getAdjacentChapter(targetReference, forward)
-    setTargetReference(newReference)
-  }
-
   <div className="parallel-reader">
-    // <button
-    //   ref={ReactDOM.Ref.domRef(buttonRef)}
-    //   onClick={_ => goToAdjacentChapter(false)}
-    //   className="chapter-button">
-    //   {"Previous Chapter"->React.string}
-    // </button>
     <div className="content">
       <VerseTable chapterData={chapterData} textualEditions={textualEditionsToDisplay} />
     </div>
-    // <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
-    //   {"Next Chapter"->React.string}
-    // </button>
   </div>
 }
