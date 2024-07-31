@@ -170,6 +170,7 @@ module IonReorderGroup = {
   @module("@ionic/react") @react.component
   external make: (
     ~disabled: bool,
+    ~color: ionColor=?,
     ~onIonItemReorder: event => unit,
     ~children: React.element,
   ) => React.element = "IonReorderGroup"
@@ -179,6 +180,7 @@ module IonItem = {
   @module("@ionic/react") @react.component
   external make: (
     ~id: string=?,
+    ~color: ionColor=?,
     ~onClick: ReactEvent.Mouse.t => unit=?,
     ~button: bool=?,
     ~detail: bool=?,
@@ -209,13 +211,17 @@ module IonButtons = {
 
 module IonIcon = {
   @module("@ionic/react") @react.component
-  external make: (~slot: string=?, ~icon: React.element=?, ~src: string=?) => React.element =
-    "IonIcon"
+  external make: (
+    ~color: ionColor=?,
+    ~slot: string=?,
+    ~icon: React.element=?,
+    ~src: string=?,
+  ) => React.element = "IonIcon"
 }
 
 module IonLabel = {
   @module("@ionic/react") @react.component
-  external make: (~children: React.element) => React.element = "IonLabel"
+  external make: (~color: ionColor=?, ~children: React.element) => React.element = "IonLabel"
 }
 
 type buttonExpand = [#block | #full]

@@ -219,6 +219,9 @@ module SearchTermMenu = {
       <IonContent>
         <IonList>
           <IonItemGroup>
+            <IonItemDivider>
+              <IonLabel> {"Search Terms"->React.string} </IonLabel>
+            </IonItemDivider>
             {searchTerms
             ->Array.mapWithIndex((term, i) => {
               <SearchTermItem
@@ -240,7 +243,7 @@ module SearchTermMenu = {
               onClick={_ => {
                 setSearchTerms([])
               }}>
-              <IonIcon icon={IonIcons.trashOutline} slot="start" />
+              <IonIcon color={#danger} icon={IonIcons.trashOutline} slot="end" />
               <IonLabel> {"Clear search terms"->React.string} </IonLabel>
             </IonItem>
           </IonItemGroup>
