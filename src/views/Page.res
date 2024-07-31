@@ -21,12 +21,17 @@ let make = () => {
     setTargetReference(newReference)
   }
   let chapterLoadingState = Store.store->Store.MobileClient.use(state => state.chapterLoadingState)
+  let setShowSearchResults =
+    Store.store->Store.MobileClient.use(state => state.setShowSearchResults)
 
   <IonPage>
     <IonHeader>
       <IonToolbar color={#light}>
         <IonButtons slot="start">
-          <IonButton className="adjacentChapterButton" shape=#round onClick={() => goToAdjacentChapter(false)}>
+          <IonButton
+            className="adjacentChapterButton"
+            shape=#round
+            onClick={() => goToAdjacentChapter(false)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronLeft />
           </IonButton>
           <IonButton
@@ -44,7 +49,10 @@ let make = () => {
               {referenceToElement(targetReference)}
             </div>
           </IonButton>
-          <IonButton className="adjacentChapterButton" shape=#round onClick={() => goToAdjacentChapter(true)}>
+          <IonButton
+            className="adjacentChapterButton"
+            shape=#round
+            onClick={() => goToAdjacentChapter(true)}>
             <IonIcon slot="icon-only" src=FeatherIcons.chevronRight />
           </IonButton>
         </IonButtons>
@@ -68,6 +76,11 @@ let make = () => {
     <IonContent ref={ReactDOM.Ref.domRef(ref)}>
       <ParallelReader contentRef={ref} />
       <SearchResults />
+      <IonFab slot=#fixed vertical=#bottom horizontal=#end>
+        <IonFabButton onClick={() => setShowSearchResults(true)}>
+          <IonIcon icon={IonIcons.search} />
+        </IonFabButton>
+      </IonFab>
       <WordInfo />
     </IonContent>
   </IonPage>

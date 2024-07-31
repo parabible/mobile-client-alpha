@@ -38,10 +38,9 @@ module VerseTable = {
               {textualEditions
               ->Array.map(t => {
                 <td
-                  style={{textAlign: "center", fontWeight: "bold"}}
+                  style={{textAlign: "center", fontWeight: "bold", width: (100 / Array.length(textualEditions))->Int.toString ++ "%"}}
                   className="verseText"
-                  key={t.id->Int.toString}
-                  width={(100 / Array.length(textualEditions))->Int.toString ++ "%"}>
+                  key={t.id->Int.toString}>
                   {t.abbreviation->React.string}
                 </td>
               })
@@ -89,6 +88,7 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
     Store.store->Store.MobileClient.use(state => state.setChapterLoadingState)
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
   let enabledTextualEditions = textualEditions->Array.filter(m => m.visible)
+  let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
   let (textualEditionsToDisplay, setTextualEditionsToDisplay) = React.useState(_ => [])
 
   // useEffect can't take arrays and it doesn't correctly memoize objects, so serialize deps
@@ -155,9 +155,17 @@ let make = (~contentRef: React.ref<RescriptCore.Nullable.t<Dom.element>>) => {
     None
   }, (serializedReference, serializedTextualEditionsToDisplay))
 
+  let goToAdjacentChapter = forward => {
+    let newReference = Books.getAdjacentChapter(targetReference, forward)
+    setTargetReference(newReference)
+  }
+
   <div className="parallel-reader">
     <div className="content">
       <VerseTable chapterData={chapterData} textualEditions={textualEditionsToDisplay} />
     </div>
+    <button onClick={_ => goToAdjacentChapter(true)} className="chapter-button">
+      {"Next Chapter"->React.string}
+    </button>
   </div>
 }

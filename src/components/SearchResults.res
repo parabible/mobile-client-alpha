@@ -138,7 +138,63 @@ module SearchTermItem = {
 //   }
 // }
 
-module SearchMenu = {
+module FilterOptionsMenu = {
+  @react.component
+  let make = () => {
+    let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
+    let setSyntaxFilter = Store.store->Store.MobileClient.use(state => state.setSyntaxFilter)
+    let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
+    let setCorpusFilter = Store.store->Store.MobileClient.use(state => state.setCorpusFilter)
+    <IonPopover trigger="filter-options-menu" dismissOnSelect={false}>
+      <IonContent>
+        <IonList>
+          <IonItem button={true} id="syntax-filter-trigger-alert">
+            <IonIcon icon={IonIcons.codeWorking} slot="start" />
+            <IonLabel>
+              <h2> {Store.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
+              <p> {"Syntax Filter"->React.string} </p>
+            </IonLabel>
+          </IonItem>
+          <IonAlert
+            trigger="syntax-filter-trigger-alert"
+            header="Syntax Filter"
+            inputs={State.availableSyntaxFilters->Array.map(f => {
+              \"type": #radio,
+              label: Store.syntaxFilterVariantToString(f),
+              value: Store.syntaxFilterVariantToString(f),
+              checked: syntaxFilter == f,
+            })}
+            buttons={["OK"]}
+            onDidDismiss={eventDetail =>
+              setSyntaxFilter(Store.syntaxFilterStringToVariant(eventDetail.detail.data.values))}
+          />
+          <IonItem button={true} id="book-filter-trigger-alert">
+            <IonIcon icon={IonIcons.filterCircleOutline} slot="start" />
+            <IonLabel>
+              <h2> {Store.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
+              <p> {"Corpus Filter"->React.string} </p>
+            </IonLabel>
+          </IonItem>
+          <IonAlert
+            trigger="book-filter-trigger-alert"
+            header="Syntax Filter"
+            inputs={State.availableCorpusFilters->Array.map(f => {
+              \"type": #radio,
+              label: Store.corpusFilterVariantToString(f),
+              value: Store.corpusFilterVariantToString(f),
+              checked: corpusFilter == f,
+            })}
+            buttons={["OK"]}
+            onDidDismiss={eventDetail =>
+              setCorpusFilter(Store.corpusFilterStringToVariant(eventDetail.detail.data.values))}
+          />
+        </IonList>
+      </IonContent>
+    </IonPopover>
+  }
+}
+
+module SearchTermMenu = {
   @react.component
   let make = () => {
     let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
@@ -159,59 +215,10 @@ module SearchMenu = {
           }
         }),
       )
-    let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
-    let setSyntaxFilter = Store.store->Store.MobileClient.use(state => state.setSyntaxFilter)
-    let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
-    let setCorpusFilter = Store.store->Store.MobileClient.use(state => state.setCorpusFilter)
-    <IonPopover trigger="popover-button" dismissOnSelect={false}>
+    <IonPopover trigger="search-term-menu" dismissOnSelect={false}>
       <IonContent>
         <IonList>
           <IonItemGroup>
-            <IonItem button={true} id="syntax-filter-trigger-alert">
-              <IonIcon icon={IonIcons.codeWorking} slot="start" />
-              <IonLabel>
-                <h2> {Store.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
-                <p> {"Syntax Filter"->React.string} </p>
-              </IonLabel>
-            </IonItem>
-            <IonAlert
-              trigger="syntax-filter-trigger-alert"
-              header="Syntax Filter"
-              inputs={State.availableSyntaxFilters->Array.map(f => {
-                \"type": #radio,
-                label: Store.syntaxFilterVariantToString(f),
-                value: Store.syntaxFilterVariantToString(f),
-                checked: syntaxFilter == f,
-              })}
-              buttons={["OK"]}
-              onDidDismiss={eventDetail =>
-                setSyntaxFilter(Store.syntaxFilterStringToVariant(eventDetail.detail.data.values))}
-            />
-            <IonItem button={true} id="book-filter-trigger-alert">
-              <IonIcon icon={IonIcons.filter} slot="start" />
-              <IonLabel>
-                <h2> {Store.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
-                <p> {"Corpus Filter"->React.string} </p>
-              </IonLabel>
-            </IonItem>
-            <IonAlert
-              trigger="book-filter-trigger-alert"
-              header="Syntax Filter"
-              inputs={State.availableCorpusFilters->Array.map(f => {
-                \"type": #radio,
-                label: Store.corpusFilterVariantToString(f),
-                value: Store.corpusFilterVariantToString(f),
-                checked: corpusFilter == f,
-              })}
-              buttons={["OK"]}
-              onDidDismiss={eventDetail =>
-                setCorpusFilter(Store.corpusFilterStringToVariant(eventDetail.detail.data.values))}
-            />
-          </IonItemGroup>
-          <IonItemGroup>
-            <IonItemDivider>
-              <IonLabel> {"Search Terms"->React.string} </IonLabel>
-            </IonItemDivider>
             {searchTerms
             ->Array.mapWithIndex((term, i) => {
               <SearchTermItem
@@ -223,6 +230,19 @@ module SearchMenu = {
               />
             })
             ->React.array}
+          </IonItemGroup>
+          <IonItemGroup>
+            <IonItemDivider>
+              <IonLabel> {"Options"->React.string} </IonLabel>
+            </IonItemDivider>
+            <IonItem
+              button={true}
+              onClick={_ => {
+                setSearchTerms([])
+              }}>
+              <IonIcon icon={IonIcons.trashOutline} slot="start" />
+              <IonLabel> {"Clear search terms"->React.string} </IonLabel>
+            </IonItem>
           </IonItemGroup>
         </IonList>
       </IonContent>
@@ -302,7 +322,6 @@ let make = () => {
   let (matchingText, setMatchingText) = React.useState(_ => None)
   let (pageNumber, setPageNumber) = React.useState(_ => 0)
   let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
-  let setSearchTerms = Store.store->Store.MobileClient.use(state => state.setSearchTerms)
   let serializedSearchTerms = Store.serializeSearchTerms(searchTerms)
   let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
   let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
@@ -388,24 +407,22 @@ let make = () => {
 
   <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults}>
     <IonHeader>
-      <IonToolbar>
+      <IonToolbar color={#light}>
+        <IonButtons slot="start">
+          <IonButton shape=#round onClick={hideSearchResults}>
+            <IonIcon slot="icon-only" icon={IonIcons.arrowBack} />
+          </IonButton>
+        </IonButtons>
         <IonTitle> {`Search Results`->React.string} </IonTitle>
         <IonButtons slot="end">
-          <IonButton shape=#round id={"popover-button"}>
-            <IonIcon slot="icon-only" icon={IonIcons.ellipsisVertical} />
+          <IonButton shape=#round id={"search-term-menu"}>
+            <IonIcon slot="icon-only" icon={IonIcons.extensionPuzzleOutline} />
           </IonButton>
-          <SearchMenu />
-          <IonButton
-            shape=#round
-            onClick={() => {
-              hideSearchResults()
-              setSearchTerms([])
-            }}>
-            <IonIcon slot="icon-only" icon={IonIcons.trash} />
+          <SearchTermMenu />
+          <IonButton shape=#round id={"filter-options-menu"}>
+            <IonIcon slot="icon-only" icon={IonIcons.filter} />
           </IonButton>
-          <IonButton shape=#round onClick={hideSearchResults}>
-            <IonIcon slot="icon-only" icon={IonIcons.close} />
-          </IonButton>
+          <FilterOptionsMenu />
         </IonButtons>
       </IonToolbar>
     </IonHeader>

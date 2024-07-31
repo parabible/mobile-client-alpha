@@ -41,6 +41,10 @@ module IonicFunctions = {
   type dismissFunction = unit => Js.Promise.t<bool>
   @module("@ionic/react")
   external useIonToast: unit => (presentFunction, dismissFunction) = "useIonToast"
+
+  type ionRouterResult = {push: string => unit}
+  @module("@ionic/react")
+  external useIonRouter: unit => ionRouterResult = "useIonRouter"
 }
 
 module IonApp = {
@@ -50,12 +54,18 @@ module IonApp = {
 
 module IonRouterOutlet = {
   @module("@ionic/react") @react.component
-  external make: (~id: string, ~children: React.element) => React.element = "IonRouterOutlet"
+  external make: (~id: string=?, ~animated: bool=?, ~children: React.element) => React.element =
+    "IonRouterOutlet"
 }
 
 module IonReactRouter = {
   @module("@ionic/react-router") @react.component
   external make: (~children: React.element) => React.element = "IonReactRouter"
+}
+
+module IonRouterLink = {
+  @module("@ionic/react-router") @react.component
+  external make: (~href: string, ~children: React.element) => React.element = "IonRouterLink"
 }
 
 module Route = {
@@ -71,6 +81,26 @@ module Redirect = {
 module IonPage = {
   @module("@ionic/react") @react.component
   external make: (~children: React.element) => React.element = "IonPage"
+}
+
+module IonTabs = {
+  @module("@ionic/react") @react.component
+  external make: (~children: React.element) => React.element = "IonTabs"
+}
+module IonTabBar = {
+  type slot = [#top | #bottom]
+  @module("@ionic/react") @react.component
+  external make: (
+    ~slot: slot=?,
+    ~color: ionColor=?,
+    ~selectedTab: string=?,
+    ~children: React.element,
+  ) => React.element = "IonTabBar"
+}
+module IonTabButton = {
+  @module("@ionic/react") @react.component
+  external make: (~tab: string, ~href: string, ~children: React.element) => React.element =
+    "IonTabButton"
 }
 
 module IonHeader = {
@@ -205,6 +235,24 @@ module IonButton = {
     ~className: string=?,
     ~children: React.element=?,
   ) => React.element = "IonButton"
+}
+
+module IonFab = {
+  type slot = [#fixed]
+  type vertical = [#top | #bottom]
+  type horizontal = [#start | #end]
+  @module("@ionic/react") @react.component
+  external make: (
+    ~slot: slot=?,
+    ~vertical: vertical=?,
+    ~horizontal: horizontal=?,
+    ~children: React.element,
+  ) => React.element = "IonFab"
+}
+module IonFabButton = {
+  @module("@ionic/react") @react.component
+  external make: (~onClick: unit => unit=?, ~children: React.element) => React.element =
+    "IonFabButton"
 }
 
 module IonModal = {
@@ -343,7 +391,9 @@ module IonIcons = {
   @module("ionicons/icons") external settings: React.element = "settings"
   @module("ionicons/icons") external apps: React.element = "apps"
   @module("ionicons/icons") external search: React.element = "search"
+  @module("ionicons/icons") external extensionPuzzleOutline: React.element = "extensionPuzzleOutline"
   @module("ionicons/icons") external close: React.element = "close"
+  @module("ionicons/icons") external arrowBack: React.element = "arrowBack"
   @module("ionicons/icons") external chevronBackOutline: React.element = "chevronBackOutline"
   @module("ionicons/icons") external chevronForward: React.element = "chevronForward"
   @module("ionicons/icons") external chevronBack: React.element = "chevronBack"
@@ -353,8 +403,10 @@ module IonIcons = {
   @module("ionicons/icons") external playBack: React.element = "playBack"
   @module("ionicons/icons") external ellipsisVertical: React.element = "ellipsisVertical"
   @module("ionicons/icons") external filter: React.element = "filter"
+  @module("ionicons/icons") external filterCircleOutline: React.element = "filterCircleOutline"
   @module("ionicons/icons") external codeWorking: React.element = "codeWorking"
   @module("ionicons/icons") external trash: React.element = "trash"
+  @module("ionicons/icons") external trashOutline: React.element = "trashOutline"
   @module("ionicons/icons") external options: React.element = "options"
   @module("ionicons/icons") external power: React.element = "power"
   @module("ionicons/icons") external flash: React.element = "flash"

@@ -102,7 +102,7 @@ let make = () => {
 
   let addSearch = () => {
     let searchTerm: State.searchTerm = switch currentMode {
-      | None => {
+    | None => {
         uuid: "none",
         inverted: false,
         data: [],
@@ -144,7 +144,7 @@ let make = () => {
     let _ = await dismissToast()
     presentToast({
       message: lexeme ++ " · " ++ gloss,
-      duration: 3000,
+      duration: 5000,
       swipeGesture: #vertical,
       buttons: [
         {icon: IonIcons.ellipsisVertical, handler: _ => setCurrentMode(_ => View)},
@@ -164,12 +164,8 @@ let make = () => {
             setShowSearchResults(true)
           },
         },
-        {icon: IonIcons.close, handler: _ => ignore(dismissToast())},
       ],
-      onDidDismiss: _ => {
-        "dismiss"->Console.log
-        setShowWordInfo(false)
-      },
+      onDidDismiss: _ => setShowWordInfo(false),
     })
   }
 
@@ -204,8 +200,8 @@ let make = () => {
   <IonModal
     className="word-info"
     isOpen={currentMode !== None}
-    initialBreakpoint={0.11}
-    breakpoints={[0., 0.11, 1.]}
+    initialBreakpoint={1.0}
+    breakpoints={[0., 1.]}
     onDidDismiss={_ => setCurrentMode(_ => None)}>
     <IonContent className="ion-padding">
       <div

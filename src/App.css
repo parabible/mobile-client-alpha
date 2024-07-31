@@ -9,6 +9,7 @@
 
 td.verseText {
   padding: 0.5em;
+  word-wrap: anywhere;
 }
 
 .word {
