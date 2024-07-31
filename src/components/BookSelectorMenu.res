@@ -2,6 +2,15 @@
 
 open IonicBindings
 
+let clearSearchInput = currentSearchInputRef => {
+  ignore(
+    %raw(`(async () => {
+      (await currentSearchInputRef.getInputElement()).value = "";
+    })()`),
+  )
+  ()
+}
+
 let getEventValue = e => {
   let target = e->JsxEvent.Form.target
   (target["value"]: string)
@@ -42,7 +51,7 @@ type mode = Book | Chapter
 
 @react.component
 let make = () => {
-  // let inputRef = React.useRef(Js.Nullable.null);
+  let inputRef = React.useRef(Js.Nullable.null)
   let (currentMode, setCurrentMode) = React.useState(_ => Book)
   let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
   let (searchValue, setSearchValue) = React.useState(_ => "")
@@ -56,10 +65,18 @@ let make = () => {
     let value = event->getEventValue
     setSearchValue(_ => value)
   }
+  let resetSearch = () => {
+    setSelectedBookState(_ => None)
+    setCurrentMode(_ => Book)
+    setSearchValue(_ => "")
+    clearSearchInput(inputRef.current)
+  }
   let onChapterSelect = chapter => {
     switch selectedBook {
     | Some(book) => {
         setTargetReference({book, chapter: chapter->Int.toString})
+        setSelectedBookState(_ => None)
+        resetSearch()
         IonicFunctions.menuController.close("book-selector")
       }
     | _ => {
@@ -74,9 +91,9 @@ let make = () => {
     ? <FilteredBookList filterValue={searchValue} selectBook={setSelectedBook} />
     : <FullBookList selectBook={setSelectedBook} />
 
-  <IonMenu side="start" menuId="book-selector" contentId="main" \"type"="overlay">
+  <IonMenu side="start" menuId="book-selector" contentId="main" \"type"="overlay" ionDidClose={{emit: _ => resetSearch()}}>
     <IonContent className="ion-padding">
-      <IonSearchbar onIonInput={onSearchInput} />
+      <IonSearchbar ref={ReactDOM.Ref.domRef(inputRef)} onIonInput={onSearchInput} />
       {switch (currentMode, selectedBook) {
       | (Book, _) | (Chapter, None) => bookSelector
       | (Chapter, Some(book)) =>

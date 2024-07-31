@@ -130,20 +130,22 @@ module IonTitle = {
 }
 
 module IonMenu = {
+  type emittable = {emit: unit => unit}
   @module("@ionic/react") @react.component
   external make: (
     ~menuId: string,
     ~side: string,
     ~contentId: string,
     ~\"type": string,
-    ~ionDidClose: unit => unit=?,
+    ~ionDidClose: emittable=?,
     ~children: React.element,
   ) => React.element = "IonMenu"
 }
 
 module IonSearchbar = {
   @module("@ionic/react") @react.component
-  external make: (~onIonInput: ReactEvent.Form.t => unit) => React.element = "IonSearchbar"
+  external make: (~ref: ReactDOM.Ref.t=?, ~onIonInput: ReactEvent.Form.t => unit) => React.element =
+    "IonSearchbar"
 }
 
 module IonList = {
@@ -391,7 +393,6 @@ module IonIcons = {
   @module("ionicons/icons") external settings: React.element = "settings"
   @module("ionicons/icons") external apps: React.element = "apps"
   @module("ionicons/icons") external search: React.element = "search"
-  @module("ionicons/icons") external extensionPuzzleOutline: React.element = "extensionPuzzleOutline"
   @module("ionicons/icons") external close: React.element = "close"
   @module("ionicons/icons") external arrowBack: React.element = "arrowBack"
   @module("ionicons/icons") external chevronBackOutline: React.element = "chevronBackOutline"
@@ -411,4 +412,6 @@ module IonIcons = {
   @module("ionicons/icons") external power: React.element = "power"
   @module("ionicons/icons") external flash: React.element = "flash"
   @module("ionicons/icons") external flashOff: React.element = "flashOff"
+  @module("ionicons/icons")
+  external extensionPuzzleOutline: React.element = "extensionPuzzleOutline"
 }
