@@ -408,6 +408,10 @@ let make = () => {
   let totalPages =
     (resultsCount->Int.toFloat /. pageSizeConstant->Int.toFloat)->Js.Math.ceil_int - 1
 
+  if totalPages >= 0 && pageNumber > totalPages {
+    setPageNumber(_ => totalPages)
+  }
+
   <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults}>
     <IonHeader>
       <IonToolbar color={#light}>
