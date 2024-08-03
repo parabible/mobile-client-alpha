@@ -200,24 +200,35 @@ let make = () => {
   <IonModal
     className="word-info"
     isOpen={currentMode !== None}
-    initialBreakpoint={1.0}
-    breakpoints={[0., 1.]}
+    // initialBreakpoint={1.0}
+    // breakpoints={[0., 1.]}
     onDidDismiss={_ => setCurrentMode(_ => None)}>
+    <IonHeader>
+      <IonToolbar color={#light}>
+        <IonButtons slot="start">
+          <IonButton shape=#round onClick={_ => setCurrentMode(_ => None)}>
+            <IonIcon slot="icon-only" icon={IonIcons.arrowBack} />
+          </IonButton>
+        </IonButtons>
+        <IonTitle> {`Word Info`->React.string} </IonTitle>
+        <IonButtons slot="end">
+          <IonButton shape=#round onClick={addSearch}>
+            <IonIcon slot="icon-only" icon={IonIcons.search} />
+          </IonButton>
+        </IonButtons>
+      </IonToolbar>
+    </IonHeader>
     <IonContent className="ion-padding">
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
+          flexDirection: "column",
           alignItems: "center",
-          fontSize: "1.3rem",
+          fontSize: "2rem",
           fontFamily: "SBL BibLit",
-          padding: "0 1rem 0.8rem",
         }}>
         <b> {currentWordInfo->lexemeFromData->React.string} </b>
-        <b> {currentWordInfo->glossFromData->React.string} </b>
-        <IonButton shape=#round onClick={addSearch}>
-          <IonIcon slot="icon-only" icon={IonIcons.search} />
-        </IonButton>
+        <span className="text-gray-400" style={{marginTop: "-0.5rem"}}> {currentWordInfo->glossFromData->React.string} </span>
       </div>
       <IonList>
         {currentWordInfo
