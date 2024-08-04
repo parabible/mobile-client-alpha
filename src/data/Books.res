@@ -58,8 +58,6 @@ let allChapters: array<bookChapterPair> =
   )
   ->Array.flat
 
-allChapters->Console.log
-
 let getAdjacentChapter: (reference, bool) => reference = (
   reference: reference,
   forward,

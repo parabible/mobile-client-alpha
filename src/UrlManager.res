@@ -5,7 +5,6 @@ let updateParamsForSearch = (serializedSearchTerms, syntaxFilter, corpusFilter) 
 }
 
 let updateParamsForRead = (reference: Books.reference) => {
-  reference->Console.log
   let abbr = Books.getBookAbbreviation(reference.book)
   let newPath = abbr->String.replaceAll(" ", "") ++ " " ++ reference.chapter
   if newPath != Url.SearchParams.get("ref") {
@@ -35,7 +34,6 @@ let make = (~children: React.element) => {
 
   React.useEffect4(() => {
     if showSearchResults {
-      "Setting search params"->Console.log
       updateParamsForSearch(serializedSearchTerms, serializedSyntaxFilter, serializedCorpusFilter)
     }
     None
@@ -43,7 +41,6 @@ let make = (~children: React.element) => {
 
   React.useEffect2(() => {
     if !showSearchResults {
-      "Setting read params"->Console.log
       updateParamsForRead(reference)
     }
     None

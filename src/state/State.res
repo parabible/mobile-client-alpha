@@ -159,13 +159,9 @@ let corpusFilterFromLocalStorage =
 
 let initialCorpusFilter = switch (corpusFilterFromUrl, corpusFilterFromLocalStorage) {
 | (None, _) => {
-    "Corpus filter from local storage: "->Console.log
-    corpusFilterFromLocalStorage->Console.log
     corpusFilterFromLocalStorage
   }
 | (_, _) => {
-    "Corpus filter from URL: "->Console.log
-    corpusFilterFromUrl->Console.log
     corpusFilterFromUrl
   }
 }

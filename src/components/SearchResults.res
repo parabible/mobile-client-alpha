@@ -359,7 +359,6 @@ let make = () => {
       setResultsCount(_ => 0)
       setTextualEditionsToDisplay(_ => [])
     } else if searchTerms->Array.length > 0 && textualEditionAbbreviations != "" {
-      serializedSearchTerms->Console.log
       setCurrentMode(_ => Loading)
       ignore(
         getSearchResults(
