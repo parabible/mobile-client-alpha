@@ -4,7 +4,7 @@ type syntaxFilter = Verse | Sentence | Clause | Phrase | None
 
 let availableSyntaxFilters: array<syntaxFilter> = [Phrase, Clause, Sentence, Verse, None]
 
-let defaultSyntaxFilter = Verse
+let defaultSyntaxFilter = "Verse"
 
 type corpusFilter = WholeBible | OldTestament | Pentateuch | NewTestament | None
 
@@ -16,21 +16,67 @@ let availableCorpusFilters: array<corpusFilter> = [
   None,
 ]
 
-let defaultCorpusFilter: corpusFilter = None
+let defaultCorpusFilter = "None"
 
 type reference = {book: string, chapter: string}
 
 type chapterLoadingState = Ready | Loading | Error
 
-type textualEdition = {id: int, abbreviation: string, visible: bool}
+let syntaxFilterStringToVariant = (syntaxFilterString: string) =>
+  switch syntaxFilterString {
+  | "Verse" => Verse
+  | "Sentence" => Sentence
+  | "Clause" => Clause
+  | "Phrase" => Phrase
+  | "Parallel" => None
+  | _ => None
+  }
 
-type searchTermDataPoint = {key: string, value: string}
+let syntaxFilterVariantToString = (syntaxFilter: syntaxFilter) =>
+  switch syntaxFilter {
+  | Verse => "Verse"
+  | Sentence => "Sentence"
+  | Clause => "Clause"
+  | Phrase => "Phrase"
+  | None => "Parallel"
+  }
 
-type searchTerm = {
-  uuid: string,
-  inverted: bool,
-  data: array<searchTermDataPoint>,
-}
+let syntaxFilterToTreeNodeTypeString = (syntaxFilter: syntaxFilter) =>
+  switch syntaxFilter {
+  | Verse => "verse"
+  | Sentence => "sentence"
+  | Clause => "clause"
+  | Phrase => "phrase"
+  | None => "parallel"
+  }
+
+let corpusFilterStringToVariant = (corpusFilterString: string) =>
+  switch corpusFilterString {
+  | "Whole Bible" => WholeBible
+  | "Old Testament" => OldTestament
+  | "Pentateuch" => Pentateuch
+  | "New Testament" => NewTestament
+  | "No Filter" => None
+  | _ => None
+  }
+
+let corpusFilterVariantToString = (corpusFilter: corpusFilter) =>
+  switch corpusFilter {
+  | WholeBible => "Whole Bible"
+  | OldTestament => "Old Testament"
+  | Pentateuch => "Pentateuch"
+  | NewTestament => "New Testament"
+  | None => "No Filter"
+  }
+
+let corpusToReferenceString = (corpusFilter: corpusFilter) =>
+  switch corpusFilter {
+  | WholeBible => "gen-rev"
+  | OldTestament => "gen-mal"
+  | Pentateuch => "gen-deut"
+  | NewTestament => "mat-rev"
+  | None => ""
+  }
 
 let decodeSelectedWord = Json.Decode.object(field => {
   id: field.required("id", Json.Decode.int),
@@ -45,10 +91,16 @@ let initialSelectedWord =
   ->Json.decode(decodeSelectedWord)
   ->Belt.Result.getWithDefault({id: -1, moduleId: -1})
 
+let showSearchResultsFromUrl = Url.Pathname.get() == "search"
+
+type dataPoint = {key: string, value: string}
+
 let decodeSearchTermDataPoint = Json.Decode.object(field => {
   key: field.required("key", Json.Decode.string),
   value: field.required("value", Json.Decode.string),
 })
+
+type searchTerm = {uuid: string, inverted: bool, data: array<dataPoint>}
 
 let decodeSearchTerms = Json.Decode.array(
   Json.Decode.object(field => {
@@ -58,35 +110,69 @@ let decodeSearchTerms = Json.Decode.array(
   }),
 )
 
-let initialSearchTerms =
-  WindowBindings.LocalStorage.getItem("searchTerms")
-  ->Option.map(Json.parse)
-  ->Option.getOr(Belt.Result.Ok(Js.Json.null))
-  ->Belt.Result.getWithDefault(Js.Json.null)
-  ->Json.decode(decodeSearchTerms)
-  ->Belt.Result.getWithDefault([])
+let searchTermsFromUrl = Url.SearchParams.getAll()->SearchTermSerde.deserializeSearchTermParams
+
+let searchTermsFromLocalStorage = (WindowBindings.LocalStorage.getItem("searchTerms")
+->Option.map(Json.parse)
+->Option.getOr(Belt.Result.Ok(Js.Json.null))
+->Belt.Result.getWithDefault(Js.Json.null)
+->Json.decode(decodeSearchTerms)
+->Belt.Result.getWithDefault([]) :> array<SearchTermSerde.searchTerm>)
+
+let initialSearchTerms = if showSearchResultsFromUrl {
+  searchTermsFromUrl
+} else {
+  searchTermsFromLocalStorage
+}
 
 let decodeSyntaxFilter = Json.Decode.string
 
-let initialSyntaxFilter =
+let syntaxFilterFromUrl = syntaxFilterStringToVariant(Url.SearchParams.get("syntaxFilter"))
+
+let syntaxFilterFromLocalStorage =
   WindowBindings.LocalStorage.getItem("syntaxFilter")
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
   ->Json.decode(decodeSyntaxFilter)
-  ->Belt.Result.getWithDefault("Verse")
+  ->Belt.Result.getWithDefault(defaultSyntaxFilter)
+  ->syntaxFilterStringToVariant
+
+let initialSyntaxFilter = switch (syntaxFilterFromUrl, syntaxFilterFromLocalStorage) {
+| (None, None) => Verse
+| (None, _) => syntaxFilterFromLocalStorage
+| (_, _) => syntaxFilterFromUrl
+}
 
 let decodeCorpusFilter = Json.Decode.string
 
-let initialCorpusFilter =
+let corpusFilterFromUrl = corpusFilterStringToVariant(Url.SearchParams.get("corpusFilter"))
+
+let corpusFilterFromLocalStorage =
   WindowBindings.LocalStorage.getItem("corpusFilter")
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
   ->Json.decode(decodeCorpusFilter)
-  ->Belt.Result.getWithDefault("None")
+  ->Belt.Result.getWithDefault(defaultCorpusFilter)
+  ->corpusFilterStringToVariant
+
+let initialCorpusFilter = switch (corpusFilterFromUrl, corpusFilterFromLocalStorage) {
+| (None, _) => {
+    "Corpus filter from local storage: "->Console.log
+    corpusFilterFromLocalStorage->Console.log
+    corpusFilterFromLocalStorage
+  }
+| (_, _) => {
+    "Corpus filter from URL: "->Console.log
+    corpusFilterFromUrl->Console.log
+    corpusFilterFromUrl
+  }
+}
 
 let defaultEnabledTextualEditions = ["BHSA", "NET", "NA1904", "CAFE", "APF"]
+
+type textualEdition = {id: int, abbreviation: string, visible: bool}
 
 let decodeTextualEditions = Json.Decode.array(
   Json.Decode.object(field => {

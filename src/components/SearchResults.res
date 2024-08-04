@@ -30,10 +30,10 @@ let getUrl = (
   ~pageSize,
 ) => {
   let modules = `modules=${textualEditionAbbreviations}`
-  let syntaxFilter = `treeNodeType=${Store.syntaxFilterToTreeNodeTypeString(syntaxFilter)}`
+  let syntaxFilter = `treeNodeType=${State.syntaxFilterToTreeNodeTypeString(syntaxFilter)}`
   let corpusFilter = switch corpusFilter {
   | None => ""
-  | corpusFilter => `corpusFilter=${Store.corpusToReferenceString(corpusFilter)}`
+  | corpusFilter => `corpusFilter=${State.corpusToReferenceString(corpusFilter)}`
   }
   let pageNumber = `page=${pageNumber->Int.toString}`
   let pageSize = `pageSize=${pageSize->Int.toString}`
@@ -99,7 +99,12 @@ module LoadingIndicator = {
 
 module SearchTermItem = {
   @react.component
-  let make = (~term: State.searchTerm, ~invertSearchTerm, ~editSearchTerm, ~dropSearchTerm) => {
+  let make = (
+    ~term: SearchTermSerde.searchTerm,
+    ~invertSearchTerm,
+    ~editSearchTerm,
+    ~dropSearchTerm,
+  ) => {
     <IonItemSliding>
       <IonItem detail={true}>
         <IonLabel>
@@ -151,7 +156,7 @@ module FilterOptionsMenu = {
           <IonItem button={true} id="syntax-filter-trigger-alert">
             <IonIcon icon={IonIcons.codeWorking} slot="start" />
             <IonLabel>
-              <h2> {Store.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
+              <h2> {State.syntaxFilterVariantToString(syntaxFilter)->React.string} </h2>
               <p> {"Syntax Filter"->React.string} </p>
             </IonLabel>
           </IonItem>
@@ -160,18 +165,18 @@ module FilterOptionsMenu = {
             header="Syntax Filter"
             inputs={State.availableSyntaxFilters->Array.map(f => {
               \"type": #radio,
-              label: Store.syntaxFilterVariantToString(f),
-              value: Store.syntaxFilterVariantToString(f),
+              label: State.syntaxFilterVariantToString(f),
+              value: State.syntaxFilterVariantToString(f),
               checked: syntaxFilter == f,
             })}
             buttons={["OK"]}
             onDidDismiss={eventDetail =>
-              setSyntaxFilter(Store.syntaxFilterStringToVariant(eventDetail.detail.data.values))}
+              setSyntaxFilter(State.syntaxFilterStringToVariant(eventDetail.detail.data.values))}
           />
           <IonItem button={true} id="book-filter-trigger-alert">
             <IonIcon icon={IonIcons.filterCircleOutline} slot="start" />
             <IonLabel>
-              <h2> {Store.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
+              <h2> {State.corpusFilterVariantToString(corpusFilter)->React.string} </h2>
               <p> {"Corpus Filter"->React.string} </p>
             </IonLabel>
           </IonItem>
@@ -180,13 +185,13 @@ module FilterOptionsMenu = {
             header="Corpus Filter"
             inputs={State.availableCorpusFilters->Array.map(f => {
               \"type": #radio,
-              label: Store.corpusFilterVariantToString(f),
-              value: Store.corpusFilterVariantToString(f),
+              label: State.corpusFilterVariantToString(f),
+              value: State.corpusFilterVariantToString(f),
               checked: corpusFilter == f,
             })}
             buttons={["OK"]}
             onDidDismiss={eventDetail =>
-              setCorpusFilter(Store.corpusFilterStringToVariant(eventDetail.detail.data.values))}
+              setCorpusFilter(State.corpusFilterStringToVariant(eventDetail.detail.data.values))}
           />
         </IonList>
       </IonContent>
@@ -204,7 +209,7 @@ module SearchTermMenu = {
       setSearchTerms(
         searchTerms->Array.mapWithIndex((term, i) => {
           if i == index {
-            let term: State.searchTerm = {
+            let term: SearchTermSerde.searchTerm = {
               uuid: term.uuid,
               inverted: !term.inverted,
               data: term.data,
@@ -325,7 +330,9 @@ let make = () => {
   let (matchingText, setMatchingText) = React.useState(_ => None)
   let (pageNumber, setPageNumber) = React.useState(_ => 0)
   let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
-  let serializedSearchTerms = Store.serializeSearchTerms(searchTerms)
+  let serializedSearchTerms = SearchTermSerde.serializeSearchTerms(
+    (searchTerms :> array<SearchTermSerde.searchTerm>),
+  )
   let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
   let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)

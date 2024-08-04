@@ -35,7 +35,7 @@ let getWordInfo = async (wordId, textualEditionId) => {
   json->Json.decode(wordInfoDecoder)
 }
 
-let wordInfoToDataPoint: wordInfoEntry => State.searchTermDataPoint = wi => {
+let wordInfoToDataPoint: wordInfoEntry => SearchTermSerde.searchTermDataPoint = wi => {
   key: wi.key,
   value: wi.value,
 }
@@ -101,7 +101,7 @@ let make = () => {
   let addSearchTerm = Store.store->Store.MobileClient.use(state => state.addSearchTerm)
 
   let addSearch = () => {
-    let searchTerm: State.searchTerm = switch currentMode {
+    let searchTerm: SearchTermSerde.searchTerm = switch currentMode {
     | None => {
         uuid: "none",
         inverted: false,
@@ -228,7 +228,9 @@ let make = () => {
           fontFamily: "SBL BibLit",
         }}>
         <b> {currentWordInfo->lexemeFromData->React.string} </b>
-        <span className="text-gray-400" style={{marginTop: "-0.5rem"}}> {currentWordInfo->glossFromData->React.string} </span>
+        <span className="text-gray-400" style={{marginTop: "-0.5rem"}}>
+          {currentWordInfo->glossFromData->React.string}
+        </span>
       </div>
       <IonList>
         {currentWordInfo

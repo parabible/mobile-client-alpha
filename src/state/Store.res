@@ -22,9 +22,9 @@ module AppStore = {
   type state = {
     selectedWord: State.selectedWord,
     setSelectedWord: State.selectedWord => unit,
-    searchTerms: array<State.searchTerm>,
-    setSearchTerms: array<State.searchTerm> => unit,
-    addSearchTerm: State.searchTerm => unit,
+    searchTerms: array<SearchTermSerde.searchTerm>,
+    setSearchTerms: array<SearchTermSerde.searchTerm> => unit,
+    addSearchTerm: SearchTermSerde.searchTerm => unit,
     deleteSearchTerm: int => unit,
     syntaxFilter: State.syntaxFilter,
     setSyntaxFilter: State.syntaxFilter => unit,
@@ -70,7 +70,7 @@ let store = MobileClient.create(set => {
       searchTerms: newSearchTerms,
     })
   },
-  addSearchTerm: (searchTerm: State.searchTerm) => {
+  addSearchTerm: (searchTerm: SearchTermSerde.searchTerm) => {
     set(state => {
       let searchTerms = [...state.searchTerms, searchTerm]
       WindowBindings.LocalStorage.setItem(
@@ -95,7 +95,7 @@ let store = MobileClient.create(set => {
         searchTerms,
       }
     }),
-  syntaxFilter: State.defaultSyntaxFilter,
+  syntaxFilter: State.initialSyntaxFilter,
   setSyntaxFilter: syntaxFilter => {
     WindowBindings.LocalStorage.setItem(
       "syntaxFilter",
@@ -106,7 +106,7 @@ let store = MobileClient.create(set => {
       syntaxFilter,
     })
   },
-  corpusFilter: State.defaultCorpusFilter,
+  corpusFilter: State.initialCorpusFilter,
   setCorpusFilter: corpusFilter => {
     WindowBindings.LocalStorage.setItem(
       "corpusFilter",
@@ -148,7 +148,7 @@ let store = MobileClient.create(set => {
       ...state,
       showWordInfo: show,
     }),
-  showSearchResults: false,
+  showSearchResults: State.showSearchResultsFromUrl,
   setShowSearchResults: show =>
     set(state => {
       ...state,
@@ -166,67 +166,3 @@ let store = MobileClient.create(set => {
     })
   },
 })
-
-let serializeSearchTerms = (searchTerms: array<State.searchTerm>) =>
-  searchTerms
-  ->Array.mapWithIndex((term, i) =>
-    [
-      ...term.data->Array.map(datapoint =>
-        ["t", i->Int.toString, "data", datapoint.key ++ "=" ++ datapoint.value]->Array.join(".")
-      ),
-      ["t", i->Int.toString, "inverted" ++ "=" ++ term.inverted->String.make]->Array.join("."),
-    ]->Array.join("&")
-  )
-  ->Array.join("&")
-
-let syntaxFilterStringToVariant = (syntaxFilterString: string) =>
-  switch syntaxFilterString {
-  | "Verse" => State.Verse
-  | "Sentence" => Sentence
-  | "Clause" => Clause
-  | "Phrase" => Phrase
-  | "Parallel" => None
-  | _ => None
-  }
-let syntaxFilterVariantToString = (syntaxFilter: State.syntaxFilter) =>
-  switch syntaxFilter {
-  | Verse => "Verse"
-  | Sentence => "Sentence"
-  | Clause => "Clause"
-  | Phrase => "Phrase"
-  | None => "Parallel"
-  }
-let syntaxFilterToTreeNodeTypeString = (syntaxFilter: State.syntaxFilter) =>
-  switch syntaxFilter {
-  | Verse => "verse"
-  | Sentence => "sentence"
-  | Clause => "clause"
-  | Phrase => "phrase"
-  | None => "parallel"
-  }
-
-let corpusFilterStringToVariant = (corpusFilterString: string) =>
-  switch corpusFilterString {
-  | "Whole Bible" => State.WholeBible
-  | "Old Testament" => OldTestament
-  | "Pentateuch" => Pentateuch
-  | "New Testament" => NewTestament
-  | "No Filter" => None
-  | _ => None
-  }
-let corpusFilterVariantToString = (corpusFilter: State.corpusFilter) =>
-  switch corpusFilter {
-  | WholeBible => "Whole Bible"
-  | OldTestament => "Old Testament"
-  | Pentateuch => "Pentateuch"
-  | NewTestament => "New Testament"
-  | None => "No Filter"
-  }
-let corpusToReferenceString = (corpusFilter: State.corpusFilter) =>
-  switch corpusFilter {
-  | WholeBible => "gen-rev"
-  | OldTestament => "gen-mal"
-  | Pentateuch => "gen-deut"
-  | NewTestament => "mat-rev"
-  | None => ""
-  }

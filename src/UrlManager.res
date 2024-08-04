@@ -1,21 +1,53 @@
+let updateParamsForSearch = (serializedSearchTerms, syntaxFilter, corpusFilter) => {
+  Url.SearchParams.replace(
+    serializedSearchTerms ++ "&syntaxFilter=" ++ syntaxFilter ++ "&corpusFilter=" ++ corpusFilter,
+  )
+}
+
+let updateParamsForRead = (reference: Books.reference) => {
+  reference->Console.log
+  let abbr = Books.getBookAbbreviation(reference.book)
+  let newPath = abbr->String.replaceAll(" ", "") ++ " " ++ reference.chapter
+  if newPath != Url.SearchParams.get("ref") {
+    Url.SearchParams.replace("ref=" ++ newPath)
+  }
+}
+
 @react.component
 let make = (~children: React.element) => {
   let showSearchResults = Store.store->Store.MobileClient.use(state => state.showSearchResults)
+  let reference = Store.store->Store.MobileClient.use(state => state.reference)
+  let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
+  let serializedSearchTerms = SearchTermSerde.serializeSearchTerms(searchTerms)
+  let syntaxFilter = Store.store->Store.MobileClient.use(state => state.syntaxFilter)
+  let serializedSyntaxFilter = State.syntaxFilterVariantToString(syntaxFilter)
+  let corpusFilter = Store.store->Store.MobileClient.use(state => state.corpusFilter)
+  let serializedCorpusFilter = State.corpusFilterVariantToString(corpusFilter)
+
   React.useEffect1(() => {
-    Url.Pathname.set(showSearchResults ? "search" : "read")
+    if showSearchResults {
+      Url.Pathname.set("search")
+    } else {
+      Url.Pathname.set("read")
+    }
     None
   }, [showSearchResults])
 
-  let reference = Store.store->Store.MobileClient.use(state => state.reference)
-  React.useEffect1(() => {
-    reference->Console.log
-    let abbr = Books.getBookAbbreviation(reference.book)
-    let newPath = abbr->String.replaceAll(" ", "") ++ " " ++ reference.chapter
-    if newPath != Url.SearchParams.get("ref") {
-      Url.SearchParams.set("ref", newPath)
+  React.useEffect4(() => {
+    if showSearchResults {
+      "Setting search params"->Console.log
+      updateParamsForSearch(serializedSearchTerms, serializedSyntaxFilter, serializedCorpusFilter)
     }
     None
-  }, [reference])
+  }, (showSearchResults, serializedSearchTerms, serializedSyntaxFilter, serializedCorpusFilter))
+
+  React.useEffect2(() => {
+    if !showSearchResults {
+      "Setting read params"->Console.log
+      updateParamsForRead(reference)
+    }
+    None
+  }, (showSearchResults, reference))
 
   <> {children} </>
 }
