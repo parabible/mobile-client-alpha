@@ -177,7 +177,7 @@ module FilterOptionsMenu = {
           </IonItem>
           <IonAlert
             trigger="book-filter-trigger-alert"
-            header="Syntax Filter"
+            header="Corpus Filter"
             inputs={State.availableCorpusFilters->Array.map(f => {
               \"type": #radio,
               label: Store.corpusFilterVariantToString(f),
