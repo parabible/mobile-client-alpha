@@ -38,7 +38,11 @@ module VerseTable = {
               {textualEditions
               ->Array.map(t => {
                 <td
-                  style={{textAlign: "center", fontWeight: "bold", width: (100 / Array.length(textualEditions))->Int.toString ++ "%"}}
+                  style={{
+                    textAlign: "center",
+                    fontWeight: "bold",
+                    width: (100 / Array.length(textualEditions))->Int.toString ++ "%",
+                  }}
                   className="verseText"
                   key={t.id->Int.toString}>
                   {t.abbreviation->React.string}
