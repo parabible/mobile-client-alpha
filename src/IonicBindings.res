@@ -111,6 +111,7 @@ module IonHeader = {
 module IonContent = {
   @module("@ionic/react") @react.component
   external make: (
+    ~id: string=?,
     ~className: string=?,
     ~fullscreen: bool=?,
     ~scrollX: bool=?,

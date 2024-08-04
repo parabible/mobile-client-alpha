@@ -17,3 +17,5 @@ module LocalStorage = {
   @scope("localStorage") @val
   external removeItem: string => unit = "removeItem"
 }
+
+@scope("location") @val external pathname: string = "pathname"

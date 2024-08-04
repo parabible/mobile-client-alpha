@@ -5,6 +5,11 @@ type book = {
   hasPrologue: bool,
 }
 
+type reference = {
+  book: string,
+  chapter: string,
+}
+
 type booksFile = {default: array<option<book>>}
 
 @module external booksFile: Js.Json.t = "./books.json"
@@ -55,8 +60,8 @@ let allChapters: array<bookChapterPair> =
 
 allChapters->Console.log
 
-let getAdjacentChapter: (State.reference, bool) => State.reference = (
-  reference: State.reference,
+let getAdjacentChapter: (reference, bool) => reference = (
+  reference: reference,
   forward,
 ) => {
   let bcPairIndex =
@@ -70,7 +75,7 @@ let getAdjacentChapter: (State.reference, bool) => State.reference = (
   ->Option.getOr({
     chapter: "1",
     book: "Genesis",
-  }) :> State.reference)
+  }) :> reference)
 }
 
 let getBookAbbreviation = book => {

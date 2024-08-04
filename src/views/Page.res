@@ -4,7 +4,7 @@ open IonicBindings
 import './Page.css';
 `)
 
-let referenceToElement = (reference: State.reference) =>
+let referenceToElement = (reference: Books.reference) =>
   switch reference.chapter == "0" {
   | true => `${Books.getBookAbbreviation(reference.book)} Pr.`->React.string
   | false => `${Books.getBookAbbreviation(reference.book)} ${reference.chapter}`->React.string
@@ -73,7 +73,7 @@ let make = () => {
         }}
       </IonToolbar>
     </IonHeader>
-    <IonContent ref={ReactDOM.Ref.domRef(ref)}>
+    <IonContent ref={ReactDOM.Ref.domRef(ref)} id="main">
       <ParallelReader contentRef={ref} />
       <SearchResults />
       <IonFab slot=#fixed vertical=#bottom horizontal=#end>

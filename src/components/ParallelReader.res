@@ -11,7 +11,7 @@ let textualEditionsAsString = (textualEditions: array<State.textualEdition>) =>
   textualEditions->Array.map(m => m.abbreviation)->Array.join(",")
 
 let getChapterData = async (
-  reference: State.reference,
+  reference: Books.reference,
   textualEditionsToDisplay: array<State.textualEdition>,
 ) => {
   let textualEditionsToDisplayAbbreviations = textualEditionsToDisplay->textualEditionsAsString

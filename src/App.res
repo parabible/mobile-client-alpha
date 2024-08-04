@@ -28,17 +28,10 @@ let make = () => {
   })
 
   <IonApp>
-    <IonReactRouter>
+    <UrlManager>
       <BookSelectorMenu />
       <TextualEditionsMenu />
-      <IonRouterOutlet id="main">
-        <Route path="/" exact={true}>
-          <Redirect to={`/Genesis 1`} />
-        </Route>
-        <Route path="/:name" exact={true}>
-          <Page />
-        </Route>
-      </IonRouterOutlet>
-    </IonReactRouter>
+      <Page />
+    </UrlManager>
   </IonApp>
 }

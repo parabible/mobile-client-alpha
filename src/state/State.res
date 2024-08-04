@@ -169,15 +169,20 @@ let refreshTextualEditions = (textualEditions, setTextualEditions) => {
   )
 }
 
-let decodeReference = Json.Decode.object(field => {
+let decodeReference = (Json.Decode.object(field => {
   book: field.required("book", Json.Decode.string),
   chapter: field.required("chapter", Json.Decode.string),
-})
+}) :> Json.Decode.t<Books.reference>)
 
-let initialReference =
+let referenceFromUrl = (ReferenceParser.parse(Url.SearchParams.get("ref")) :> option<
+  Books.reference,
+>)
+
+let initialReference = referenceFromUrl->Option.getOr(
   WindowBindings.LocalStorage.getItem("reference")
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
   ->Json.decode(decodeReference)
-  ->Belt.Result.getWithDefault({book: "John", chapter: "1"})
+  ->Belt.Result.getWithDefault({book: "John", chapter: "1"}),
+)
