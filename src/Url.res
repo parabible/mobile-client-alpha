@@ -2,7 +2,7 @@ module SearchParams = {
   let get = (key: string) => {
     let s = %raw(`(() => {
       const params = window.URLSearchParams ? new URLSearchParams(location.search) : URLSearchParamsPoylfill(location.search)
-      return params.get(key)
+      return params.get(key) || ""
     })()`)
     s
   }
