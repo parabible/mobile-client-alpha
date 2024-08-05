@@ -1,5 +1,24 @@
 open IonicBindings
 
+module TextualEditionLabel = {
+  @react.component
+  let make = (~abbreviation: string) => {
+    let d = State.temporaryTextualEditionData->Array.find(te => te.abbreviation == abbreviation)
+
+    switch d {
+    | None => <IonLabel> {abbreviation->React.string} </IonLabel>
+    | Some(d) =>
+      <>
+        <IonLabel>
+          {abbreviation->React.string}
+          {(" (" ++ d.language ++ ")")->React.string}
+        </IonLabel>
+        <IonNote> {d.fullname->React.string} </IonNote>
+      </>
+    }
+  }
+}
+
 @react.component
 let make = () => {
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
@@ -48,7 +67,7 @@ let make = () => {
                 justify="start"
                 checked={textualEdition.visible}
                 onIonChange={_ => toggleTextualEdition(textualEdition.id)}>
-                {textualEdition.abbreviation->React.string}
+                <TextualEditionLabel abbreviation={textualEdition.abbreviation} />
               </IonCheckbox>
               <IonReorder slot="end" />
             </IonItem>

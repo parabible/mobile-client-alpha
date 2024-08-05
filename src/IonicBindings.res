@@ -225,6 +225,11 @@ module IonLabel = {
   external make: (~color: ionColor=?, ~children: React.element) => React.element = "IonLabel"
 }
 
+module IonNote = {
+  @module("@ionic/react") @react.component
+  external make: (~color: ionColor=?, ~children: React.element) => React.element = "IonNote"
+}
+
 type buttonExpand = [#block | #full]
 type buttonFill = [#clear | #outline | #solid]
 type buttonSize = [#small | #default | #large]

@@ -268,3 +268,83 @@ let initialReference = referenceFromUrl->Option.getOr(
   ->Json.decode(decodeReference)
   ->Belt.Result.getWithDefault({book: "John", chapter: "1"}),
 )
+
+type corpora = OT | NT | ApF
+type temporaryTextualEditionData = {
+  abbreviation: string,
+  language: string,
+  corpora: array<corpora>,
+  fullname: string,
+}
+let temporaryTextualEditionData = [{
+  abbreviation: "BHSA",
+  language: "Hebrew",
+  corpora: [OT],
+  fullname: "Biblia Hebraica Stuttgartensia Amstelodamensis (tagged)",
+}, {
+  abbreviation: "NET",
+  language: "English",
+  corpora: [OT,NT],
+  fullname: "New English Translation",
+}, {
+  abbreviation: "NA1904",
+  language: "Greek",
+  corpora: [NT],
+  fullname: "Nestle-Aland 1904 (tagged)",
+}, {
+  abbreviation: "CAFE",
+  language: "English",
+  corpora: [ApF],
+  fullname: "Contemporary Apostolic Fathers Edition",
+}, {
+  abbreviation: "RVG",
+  language: "Spanish",
+  corpora: [OT,NT],
+  fullname: "Reina Valera Gómez",
+}, {
+  abbreviation: "CUNPT",
+  language: "Chinese",
+  corpora: [OT,NT],
+  fullname: "Chinese Union Version (Traditional)",
+}, {
+  abbreviation: "CUNPS",
+  language: "Chinese",
+  corpora: [OT,NT],
+  fullname: "Chinese Union Version (Simplified)",
+}, {
+  abbreviation: "APF",
+  language: "Greek",
+  corpora: [ApF],
+  fullname: "Apostolic Fathers (tagged)",
+}, {
+  abbreviation: "LAPF",
+  language: "English",
+  corpora: [ApF],
+  fullname: "Lightfoot's Translation of the Apostolic Fathers",
+}, {
+  abbreviation: "ULT",
+  language: "English",
+  corpora: [OT,NT],
+  fullname: "UnfoldingWord Literal Translation",
+}, {
+  abbreviation: "BSB",
+  language: "English",
+  corpora: [OT,NT],
+  fullname: "Berean Standard Bible",
+}, {
+  abbreviation: "LXXR",
+  language: "English",
+  corpora: [OT],
+  fullname: "Rahlfs Septuagint (tagged)",
+}, {
+  abbreviation: "UST",
+  language: "English",
+  corpora: [OT,NT],
+  fullname: "UnfoldingWord Simplified Translation",
+}, {
+  abbreviation: "JPS",
+  language: "English",
+  corpora: [OT],
+  fullname: "Jewish Publication Society",
+}
+]
