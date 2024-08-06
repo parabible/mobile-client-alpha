@@ -158,12 +158,8 @@ let corpusFilterFromLocalStorage =
   ->corpusFilterStringToVariant
 
 let initialCorpusFilter = switch (corpusFilterFromUrl, corpusFilterFromLocalStorage) {
-| (None, _) => {
-    corpusFilterFromLocalStorage
-  }
-| (_, _) => {
-    corpusFilterFromUrl
-  }
+| (None, _) => corpusFilterFromLocalStorage
+| (_, _) => corpusFilterFromUrl
 }
 
 let defaultEnabledTextualEditions = ["BHSA", "NET", "NA1904", "CAFE", "APF"]
@@ -270,81 +266,111 @@ let initialReference = referenceFromUrl->Option.getOr(
 )
 
 type corpora = OT | NT | ApF
+
 type temporaryTextualEditionData = {
   abbreviation: string,
   language: string,
   corpora: array<corpora>,
   fullname: string,
+  source_text: bool,
 }
-let temporaryTextualEditionData = [{
-  abbreviation: "BHSA",
-  language: "Hebrew",
-  corpora: [OT],
-  fullname: "Biblia Hebraica Stuttgartensia Amstelodamensis (tagged)",
-}, {
-  abbreviation: "NET",
-  language: "English",
-  corpora: [OT,NT],
-  fullname: "New English Translation",
-}, {
-  abbreviation: "NA1904",
-  language: "Greek",
-  corpora: [NT],
-  fullname: "Nestle-Aland 1904 (tagged)",
-}, {
-  abbreviation: "CAFE",
-  language: "English",
-  corpora: [ApF],
-  fullname: "Contemporary Apostolic Fathers Edition",
-}, {
-  abbreviation: "RVG",
-  language: "Spanish",
-  corpora: [OT,NT],
-  fullname: "Reina Valera Gómez",
-}, {
-  abbreviation: "CUNPT",
-  language: "Chinese",
-  corpora: [OT,NT],
-  fullname: "Chinese Union Version (Traditional)",
-}, {
-  abbreviation: "CUNPS",
-  language: "Chinese",
-  corpora: [OT,NT],
-  fullname: "Chinese Union Version (Simplified)",
-}, {
-  abbreviation: "APF",
-  language: "Greek",
-  corpora: [ApF],
-  fullname: "Apostolic Fathers (tagged)",
-}, {
-  abbreviation: "LAPF",
-  language: "English",
-  corpora: [ApF],
-  fullname: "Lightfoot's Translation of the Apostolic Fathers",
-}, {
-  abbreviation: "ULT",
-  language: "English",
-  corpora: [OT,NT],
-  fullname: "UnfoldingWord Literal Translation",
-}, {
-  abbreviation: "BSB",
-  language: "English",
-  corpora: [OT,NT],
-  fullname: "Berean Standard Bible",
-}, {
-  abbreviation: "LXXR",
-  language: "English",
-  corpora: [OT],
-  fullname: "Rahlfs Septuagint (tagged)",
-}, {
-  abbreviation: "UST",
-  language: "English",
-  corpora: [OT,NT],
-  fullname: "UnfoldingWord Simplified Translation",
-}, {
-  abbreviation: "JPS",
-  language: "English",
-  corpora: [OT],
-  fullname: "Jewish Publication Society",
-}
+let temporaryTextualEditionData = [
+  {
+    abbreviation: "BHSA",
+    language: "Hebrew",
+    corpora: [OT],
+    fullname: "Biblia Hebraica Stuttgartensia Amstelodamensis (tagged)",
+    source_text: true,
+  },
+  {
+    abbreviation: "NET",
+    language: "English",
+    corpora: [OT, NT],
+    fullname: "New English Translation",
+    source_text: false,
+  },
+  {
+    abbreviation: "NA1904",
+    language: "Greek",
+    corpora: [NT],
+    fullname: "Nestle-Aland 1904 (tagged)",
+    source_text: true,
+  },
+  {
+    abbreviation: "CAFE",
+    language: "English",
+    corpora: [ApF],
+    fullname: "Contemporary Apostolic Fathers Edition",
+    source_text: false,
+  },
+  {
+    abbreviation: "RVG",
+    language: "Spanish",
+    corpora: [OT, NT],
+    fullname: "Reina Valera Gómez",
+    source_text: false,
+  },
+  {
+    abbreviation: "CUNPT",
+    language: "Chinese",
+    corpora: [OT, NT],
+    fullname: "Chinese Union Version (Traditional)",
+    source_text: false,
+  },
+  {
+    abbreviation: "CUNPS",
+    language: "Chinese",
+    corpora: [OT, NT],
+    fullname: "Chinese Union Version (Simplified)",
+    source_text: false,
+  },
+  {
+    abbreviation: "APF",
+    language: "Greek",
+    corpora: [ApF],
+    fullname: "Apostolic Fathers (tagged)",
+    source_text: true,
+  },
+  {
+    abbreviation: "LAPF",
+    language: "English",
+    corpora: [ApF],
+    fullname: "Lightfoot's Translation of the Apostolic Fathers",
+    source_text: false,
+  },
+  {
+    abbreviation: "ULT",
+    language: "English",
+    corpora: [OT, NT],
+    fullname: "UnfoldingWord Literal Translation",
+    source_text: false,
+  },
+  {
+    abbreviation: "BSB",
+    language: "English",
+    corpora: [OT, NT],
+    fullname: "Berean Standard Bible",
+    source_text: false,
+  },
+  {
+    abbreviation: "LXXR",
+    language: "Greek",
+    corpora: [OT],
+    fullname: "Rahlfs Septuagint (tagged)",
+    source_text: true,
+  },
+  {
+    abbreviation: "UST",
+    language: "English",
+    corpora: [OT, NT],
+    fullname: "UnfoldingWord Simplified Translation",
+    source_text: false,
+  },
+  {
+    abbreviation: "JPS",
+    language: "English",
+    corpora: [OT],
+    fullname: "Jewish Publication Society",
+    source_text: false,
+  },
 ]

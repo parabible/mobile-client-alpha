@@ -18,6 +18,8 @@ module Store = {
   }
 }
 
+type textualEditionDisplayOptions = All | CurrentCorpus | English | SourceTexts
+
 module AppStore = {
   type state = {
     selectedWord: State.selectedWord,
@@ -42,6 +44,8 @@ module AppStore = {
     setShowSearchResults: bool => unit,
     textualEditions: array<State.textualEdition>,
     setTextualEditions: array<State.textualEdition> => unit,
+    textualEditionDisplayOptions: textualEditionDisplayOptions,
+    setTextualEditionDisplayOptions: textualEditionDisplayOptions => unit,
   }
 }
 
@@ -165,4 +169,10 @@ let store = MobileClient.create(set => {
       textualEditions: editions,
     })
   },
+  textualEditionDisplayOptions: CurrentCorpus,
+  setTextualEditionDisplayOptions: option =>
+    set(state => {
+      ...state,
+      textualEditionDisplayOptions: option,
+    }),
 })

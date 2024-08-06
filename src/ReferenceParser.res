@@ -3,6 +3,8 @@ type reference = {
   chapter: string,
 }
 
+type corpora = OT | NT | ApF
+
 let parse: string => option<reference> = (reference: string) => {
   let parts = reference->String.split(" ")
   let bookAbbreviation = parts->Array.get(0)
@@ -26,5 +28,19 @@ let parse: string => option<reference> = (reference: string) => {
       })
     }
   | None => None
+  }
+}
+
+let getCorpusFromReference = (reference: Books.reference) => {
+  let book = reference.book
+  let index = Books.books->Array.findIndex(b => b.name == book)
+  if index < 0 {
+    None
+  } else if index < 39 {
+    Some(OT)
+  } else if index < 66 {
+    Some(NT)
+  } else {
+    Some(ApF)
   }
 }

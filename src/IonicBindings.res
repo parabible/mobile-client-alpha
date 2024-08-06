@@ -161,6 +161,24 @@ module IonListHeader = {
   external make: (~children: React.element) => React.element = "IonListHeader"
 }
 
+module IonSelect = {
+  type eventDetail = {value: string}
+  type event = {detail: eventDetail}
+  @module("@ionic/react") @react.component
+  external make: (
+    ~label: string=?,
+    ~placeholder: string=?,
+    ~value: string=?,
+    ~onIonChange: event => unit=?,
+    ~children: React.element,
+  ) => React.element = "IonSelect"
+}
+
+module IonSelectOption = {
+  @module("@ionic/react") @react.component
+  external make: (~value: string, ~children: React.element) => React.element = "IonSelectOption"
+}
+
 module IonReorderGroup = {
   type eventDetail = {
     from: int,

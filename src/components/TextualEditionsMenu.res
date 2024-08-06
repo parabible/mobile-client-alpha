@@ -19,12 +19,62 @@ module TextualEditionLabel = {
   }
 }
 
+type textualEditionDisplayOptionsList = {
+  id: string,
+  option: Store.textualEditionDisplayOptions,
+  description: string,
+}
+let defaultTextualDisplayOption = {
+  id: "all",
+  option: All,
+  description: "All",
+}
+let textualEditionDisplayOptionsList = [
+  defaultTextualDisplayOption,
+  {
+    id: "current-corpus",
+    option: CurrentCorpus,
+    description: "Current Corpus",
+  },
+  {
+    id: "english",
+    option: English,
+    description: "English",
+  },
+  {
+    id: "source-texts",
+    option: SourceTexts,
+    description: "Source Texts",
+  },
+]
+
 @react.component
 let make = () => {
+  let reference = Store.store->Store.MobileClient.use(state => state.reference)
   let textualEditions = Store.store->Store.MobileClient.use(state => state.textualEditions)
   let setTextualEditions = Store.store->Store.MobileClient.use(state => {
     state.setTextualEditions
   })
+  let textualEditionDisplayOptions =
+    Store.store->Store.MobileClient.use(state => state.textualEditionDisplayOptions)
+  let actualTextualEditionDisplayOption =
+    textualEditionDisplayOptionsList
+    ->Array.find(v => v.option == textualEditionDisplayOptions)
+    ->Option.getOr(defaultTextualDisplayOption)
+
+  let setTextualEditionDisplayOptions = Store.store->Store.MobileClient.use(state => {
+    state.setTextualEditionDisplayOptions
+  })
+
+  let handleDisplayOptionsChange = (newValue: string) => {
+    let option = textualEditionDisplayOptionsList->Array.find(v => v.id == newValue)
+    let newValue = switch option {
+    | None => Store.All
+    | Some(option) => option.option
+    }
+    setTextualEditionDisplayOptions(newValue)
+  }
+
   let toggleTextualEdition = id => {
     let newTextualEditions = textualEditions->Array.map(m => {
       if m.id == id {
@@ -55,11 +105,39 @@ let make = () => {
   }
 
   <IonMenu menuId="textualEditions" side="end" contentId="main" \"type"="overlay">
-    <IonContent>
+    <IonContent className="ion-padding">
       <IonList>
         <IonListHeader> {"Available Modules"->React.string} </IonListHeader>
+        <IonSelect
+          label="Textual Editions to Show"
+          value={actualTextualEditionDisplayOption.id}
+          onIonChange={x => x.detail.value->handleDisplayOptionsChange}>
+          {textualEditionDisplayOptionsList
+          ->Array.map(v =>
+            <IonSelectOption key={v.id} value={v.id}>
+              {v.description->React.string}
+            </IonSelectOption>
+          )
+          ->React.array}
+        </IonSelect>
         <IonReorderGroup disabled={false} onIonItemReorder={handleReorder}>
           {textualEditions
+          ->Array.filter(te => {
+            let d =
+              State.temporaryTextualEditionData->Array.find(t => t.abbreviation == te.abbreviation)
+            switch actualTextualEditionDisplayOption.option {
+            | All => true
+            | CurrentCorpus => {
+                let corpus = reference->ReferenceParser.getCorpusFromReference
+                switch (corpus, d) {
+                | (Some(corpus), Some(d)) => d.corpora->Array.includes((corpus :> State.corpora))
+                | _ => false
+                }
+              }
+            | English => d->Option.map(d => d.language == "English")->Option.getOr(false)
+            | SourceTexts => d->Option.map(d => d.source_text)->Option.getOr(false)
+            }
+          })
           ->Array.map(textualEdition =>
             <IonItem key={textualEdition.abbreviation}>
               <IonCheckbox
