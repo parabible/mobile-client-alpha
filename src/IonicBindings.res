@@ -179,6 +179,17 @@ module IonSelectOption = {
   external make: (~value: string, ~children: React.element) => React.element = "IonSelectOption"
 }
 
+module IonToggle = {
+  type eventDetail = {checked: bool}
+  type event = {detail: eventDetail}
+  @module("@ionic/react") @react.component
+  external make: (
+    ~checked: bool=?,
+    ~onIonChange: event => unit=?,
+    ~children: React.element,
+  ) => React.element = "IonToggle"
+}
+
 module IonReorderGroup = {
   type eventDetail = {
     from: int,

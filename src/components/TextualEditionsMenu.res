@@ -24,18 +24,13 @@ type textualEditionDisplayOptionsList = {
   option: Store.textualEditionDisplayOptions,
   description: string,
 }
-let defaultTextualDisplayOption = {
+let defaultTextualLanguageOption = {
   id: "all",
   option: All,
   description: "All",
 }
-let textualEditionDisplayOptionsList = [
-  defaultTextualDisplayOption,
-  {
-    id: "current-corpus",
-    option: CurrentCorpus,
-    description: "Current Corpus",
-  },
+let textualEditionLanguageOptions = [
+  defaultTextualLanguageOption,
   {
     id: "english",
     option: English,
@@ -55,24 +50,20 @@ let make = () => {
   let setTextualEditions = Store.store->Store.MobileClient.use(state => {
     state.setTextualEditions
   })
-  let textualEditionDisplayOptions =
-    Store.store->Store.MobileClient.use(state => state.textualEditionDisplayOptions)
+  let (filterToCurrentCorpus, setFilterToCurrentCorpus) = React.useState(_ => false)
+  let (textualEditionLanguage, setTextualEditionLanguage) = React.useState(_ => Store.English)
   let actualTextualEditionDisplayOption =
-    textualEditionDisplayOptionsList
-    ->Array.find(v => v.option == textualEditionDisplayOptions)
-    ->Option.getOr(defaultTextualDisplayOption)
-
-  let setTextualEditionDisplayOptions = Store.store->Store.MobileClient.use(state => {
-    state.setTextualEditionDisplayOptions
-  })
+    textualEditionLanguageOptions
+    ->Array.find(v => v.option == textualEditionLanguage)
+    ->Option.getOr(defaultTextualLanguageOption)
 
   let handleDisplayOptionsChange = (newValue: string) => {
-    let option = textualEditionDisplayOptionsList->Array.find(v => v.id == newValue)
+    let option = textualEditionLanguageOptions->Array.find(v => v.id == newValue)
     let newValue = switch option {
     | None => Store.All
     | Some(option) => option.option
     }
-    setTextualEditionDisplayOptions(newValue)
+    setTextualEditionLanguage(_ => newValue)
   }
 
   let toggleTextualEdition = id => {
@@ -108,11 +99,16 @@ let make = () => {
     <IonContent className="ion-padding">
       <IonList>
         <IonListHeader> {"Available Modules"->React.string} </IonListHeader>
+        <IonToggle
+          checked={filterToCurrentCorpus}
+          onIonChange={x => setFilterToCurrentCorpus(_ => x.detail.checked)}>
+          {"Filter to Current Corpus"->React.string}
+        </IonToggle>
         <IonSelect
           label="Textual Editions to Show"
           value={actualTextualEditionDisplayOption.id}
           onIonChange={x => x.detail.value->handleDisplayOptionsChange}>
-          {textualEditionDisplayOptionsList
+          {textualEditionLanguageOptions
           ->Array.map(v =>
             <IonSelectOption key={v.id} value={v.id}>
               {v.description->React.string}
@@ -122,18 +118,27 @@ let make = () => {
         </IonSelect>
         <IonReorderGroup disabled={false} onIonItemReorder={handleReorder}>
           {textualEditions
-          ->Array.filter(te => {
-            let d =
-              State.temporaryTextualEditionData->Array.find(t => t.abbreviation == te.abbreviation)
-            switch actualTextualEditionDisplayOption.option {
-            | All => true
-            | CurrentCorpus => {
+          ->Array.filter(te =>
+            switch filterToCurrentCorpus {
+            | true => {
+                let d =
+                  State.temporaryTextualEditionData->Array.find(t =>
+                    t.abbreviation == te.abbreviation
+                  )
                 let corpus = reference->ReferenceParser.getCorpusFromReference
                 switch (corpus, d) {
                 | (Some(corpus), Some(d)) => d.corpora->Array.includes((corpus :> State.corpora))
                 | _ => false
                 }
               }
+            | false => true
+            }
+          )
+          ->Array.filter(te => {
+            let d =
+              State.temporaryTextualEditionData->Array.find(t => t.abbreviation == te.abbreviation)
+            switch actualTextualEditionDisplayOption.option {
+            | All => true
             | English => d->Option.map(d => d.language == "English")->Option.getOr(false)
             | SourceTexts => d->Option.map(d => d.source_text)->Option.getOr(false)
             }
