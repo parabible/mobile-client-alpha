@@ -50,7 +50,8 @@ let make = () => {
   let setTextualEditions = Store.store->Store.MobileClient.use(state => {
     state.setTextualEditions
   })
-  let (filterToCurrentCorpus, setFilterToCurrentCorpus) = React.useState(_ => false)
+  let (filterToVisible, setFilterToVisible) = React.useState(_ => false)
+  let (filterToCurrentCorpus, setFilterToCurrentCorpus) = React.useState(_ => true)
   let (textualEditionLanguage, setTextualEditionLanguage) = React.useState(_ => Store.English)
   let actualTextualEditionDisplayOption =
     textualEditionLanguageOptions
@@ -97,27 +98,41 @@ let make = () => {
 
   <IonMenu menuId="textualEditions" side="end" contentId="main" \"type"="overlay">
     <IonContent className="ion-padding">
+      <h1 className="text-xl"> {"Textual Editions"->React.string} </h1>
       <IonList>
-        <IonListHeader> {"Available Modules"->React.string} </IonListHeader>
-        <IonToggle
-          checked={filterToCurrentCorpus}
-          onIonChange={x => setFilterToCurrentCorpus(_ => x.detail.checked)}>
-          {"Filter to Current Corpus"->React.string}
-        </IonToggle>
-        <IonSelect
-          label="Textual Editions to Show"
-          value={actualTextualEditionDisplayOption.id}
-          onIonChange={x => x.detail.value->handleDisplayOptionsChange}>
-          {textualEditionLanguageOptions
-          ->Array.map(v =>
-            <IonSelectOption key={v.id} value={v.id}>
-              {v.description->React.string}
-            </IonSelectOption>
-          )
-          ->React.array}
-        </IonSelect>
+        <IonItem>
+          <IonToggle
+            checked={filterToVisible} onIonChange={x => setFilterToVisible(_ => x.detail.checked)}>
+            {"Only Show Visible"->React.string}
+          </IonToggle>
+        </IonItem>
+        <IonItem>
+          <IonToggle
+            checked={filterToCurrentCorpus}
+            onIonChange={x => setFilterToCurrentCorpus(_ => x.detail.checked)}>
+            {"Only Show Relevant"->React.string}
+          </IonToggle>
+        </IonItem>
+        <IonItem>
+          <IonSelect
+            label="Languages to Show"
+            value={actualTextualEditionDisplayOption.id}
+            onIonChange={x => x.detail.value->handleDisplayOptionsChange}>
+            {textualEditionLanguageOptions
+            ->Array.map(v =>
+              <IonSelectOption key={v.id} value={v.id}>
+                {v.description->React.string}
+              </IonSelectOption>
+            )
+            ->React.array}
+          </IonSelect>
+        </IonItem>
+      </IonList>
+      <h2 className="text-lg mt-4"> {"Reorder Textual Editions"->React.string} </h2>
+      <IonList>
         <IonReorderGroup disabled={false} onIonItemReorder={handleReorder}>
           {textualEditions
+          ->Array.filter(te => !filterToVisible || te.visible)
           ->Array.filter(te =>
             switch filterToCurrentCorpus {
             | true => {
