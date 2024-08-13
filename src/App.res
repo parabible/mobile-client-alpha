@@ -9,6 +9,7 @@ import '@ionic/react/css/text-alignment.css'
 import '@ionic/react/css/text-transformation.css';
 import '@ionic/react/css/flex-utils.css';
 import '@ionic/react/css/display.css';
+import '@ionic/react/css/palettes/dark.class.css';
 import './App.css';
 `)
 
@@ -21,11 +22,22 @@ let make = () => {
   let setTextualEditions = Store.store->Store.MobileClient.use(state => {
     state.setTextualEditions
   })
+  let darkMode = Store.store->Store.MobileClient.use(state => state.darkMode)
 
   React.useEffect0(() => {
     State.refreshTextualEditions(textualEditions, setTextualEditions)
     None
   })
+
+  // toggle "ion-palette-dark" on document based on darkMode
+  React.useEffect1(() => {
+    ignore(
+      %raw(`
+      document.documentElement.classList.toggle('ion-palette-dark', darkMode)
+    `),
+    )
+    None
+  }, [darkMode])
 
   <IonApp>
     <UrlManager>

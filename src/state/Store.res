@@ -44,6 +44,8 @@ module AppStore = {
     setShowSearchResults: bool => unit,
     textualEditions: array<State.textualEdition>,
     setTextualEditions: array<State.textualEdition> => unit,
+    darkMode: bool,
+    setDarkMode: bool => unit,
   }
 }
 
@@ -167,4 +169,13 @@ let store = MobileClient.create(set => {
       textualEditions: editions,
     })
   },
+  darkMode: WindowBindings.matchMedia("(prefers-color-scheme: dark)").matches,
+  setDarkMode: darkMode =>
+    set(state => {
+      WindowBindings.LocalStorage.setItem("darkMode", darkMode->JSON.stringifyAny->Option.getOr(""))
+      {
+        ...state,
+        darkMode,
+      }
+    }),
 })

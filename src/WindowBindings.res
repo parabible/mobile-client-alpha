@@ -19,3 +19,11 @@ module LocalStorage = {
 }
 
 @scope("location") @val external pathname: string = "pathname"
+
+
+// matchMedia
+type matches = {
+  media: string,
+  matches: bool,
+}
+@scope("window") @val external matchMedia: string => matches = "matchMedia"

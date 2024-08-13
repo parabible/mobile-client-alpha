@@ -453,6 +453,7 @@ module IonIcons = {
   @module("ionicons/icons") external power: React.element = "power"
   @module("ionicons/icons") external flash: React.element = "flash"
   @module("ionicons/icons") external flashOff: React.element = "flashOff"
+  @module("ionicons/icons") external contrast: React.element = "contrast"
   @module("ionicons/icons")
   external extensionPuzzleOutline: React.element = "extensionPuzzleOutline"
 }

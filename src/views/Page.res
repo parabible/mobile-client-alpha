@@ -13,6 +13,10 @@ let referenceToElement = (reference: Books.reference) =>
 @react.component
 let make = () => {
   let ref = React.useRef(Nullable.null)
+  let darkMode = Store.store->Store.MobileClient.use(state => state.darkMode)
+  let setDarkMode = Store.store->Store.MobileClient.use(state => {
+    state.setDarkMode
+  })
   let reference = Store.store->Store.MobileClient.use(state => state.reference)
   let targetReference = Store.store->Store.MobileClient.use(state => state.targetReference)
   let setTargetReference = Store.store->Store.MobileClient.use(state => state.setTargetReference)
@@ -57,6 +61,9 @@ let make = () => {
           </IonButton>
         </IonButtons>
         <IonButtons slot="end">
+          <IonButton shape={#round} onClick={_ => setDarkMode(!darkMode)}>
+            <IonIcon slot="icon-only" icon={IonIcons.contrast} />
+          </IonButton>
           <IonButton
             shape=#round onClick={() => IonicFunctions.menuController.\"open"("textualEditions")}>
             <IonIcon slot="icon-only" icon={IonIcons.apps} />

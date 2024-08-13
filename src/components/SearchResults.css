@@ -7,6 +7,11 @@
     text-align: center;
 }
 
+.ion-palette-dark .search-result-reference {
+    background-color: #4b5563;
+    color: #f3f4f6;
+}
+
 .result-count {
     font-size: 0.7em;
     padding: 0;
@@ -14,6 +19,10 @@
     color: #4b5563;
     text-transform: uppercase;
     text-align: center;
+}
+
+.ion-palette-dark .result-count {
+    color: #f3f4f6;
 }
 
 .centered {
@@ -35,4 +44,8 @@
     align-items: center;
     background-color: rgba(255, 255, 255, 0.9);
     z-index: 100;
+}
+
+.ion-palette-dark .overlay {
+    background-color: rgba(0, 0, 0, 0.6);
 }
