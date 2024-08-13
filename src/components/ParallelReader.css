@@ -21,6 +21,18 @@
 .chapter-button:hover {
     background-color: #e0e3eb;
 }
+.chapter-button:active {
+    background-color: #d6d9e0;
+}
+.ion-palette-dark .chapter-button {
+    background-color: #4b5563;
+}
+.ion-palette-dark .chapter-button:hover {
+    background-color: #3b3f4a;
+}
+.ion-palette-dark .chapter-button:active {
+    background-color: #2b2f3a;
+}
 
 .verseNumber {
     font-size: 0.5rem;
