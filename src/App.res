@@ -13,6 +13,7 @@ import '@ionic/react/css/palettes/dark.class.css';
 import './App.css';
 `)
 
+open Webapi
 open IonicBindings
 IonicFunctions.setupIonicReact()
 
@@ -29,13 +30,16 @@ let make = () => {
     None
   })
 
-  // toggle "ion-palette-dark" on document based on darkMode
   React.useEffect1(() => {
-    ignore(
-      %raw(`
-      document.documentElement.classList.toggle('ion-palette-dark', darkMode)
-    `),
-    )
+    let classList =
+      Dom.document
+      ->Dom.Document.documentElement
+      ->Dom.Element.classList
+    if darkMode {
+      classList->Dom.DomTokenList.add("ion-palette-dark")
+    } else {
+      classList->Dom.DomTokenList.remove("ion-palette-dark")
+    }
     None
   }, [darkMode])
 

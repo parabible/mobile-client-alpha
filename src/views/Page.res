@@ -1,8 +1,6 @@
-// module IonButton = IonicBindings.IonButton
+%%raw(`import './Page.css';`)
+
 open IonicBindings
-%%raw(`
-import './Page.css';
-`)
 
 let referenceToElement = (reference: Books.reference) =>
   switch reference.chapter == "0" {

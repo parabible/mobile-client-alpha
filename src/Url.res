@@ -1,50 +1,28 @@
+open WindowBindings
+
 module SearchParams = {
-  let get = (key: string) => {
-    let s = %raw(`(() => {
-      const params = new URLSearchParams(location.search)
-      return params.get(key) || ""
-    })()`)
-    s
+  let get = (key: string): string => {
+    let params = URLSearchParams.make(location.search)
+    params->URLSearchParams.get(key)->Js.Nullable.toOption->Belt.Option.getWithDefault("")
   }
 
-  let getAll = () => {
-    let s = %raw(`(() => {
-      const params = new URLSearchParams(location.search)
-      return Array.from(params)
-    })()`)
-    s
+  let getAll = (): array<(string, string)> => {
+    let params = URLSearchParams.make(location.search)
+    params->URLSearchParams.asIterable->Array.fromArrayLike
   }
 
-  // let set = (key: string, value: string) => {
-  //   ignore(
-  //     %raw(`(() => {
-  //       const params = new URLSearchParams(location.search)
-  //       params.set(key, value)
-  //       window.history.replaceState({}, '', location.pathname + "?" + params)
-  //     })()`),
-  //   )
-  // }
-
-  let replace = (params: string) => {
-    ignore(
-      %raw(`(() => {
-        window.history.replaceState({}, '', location.pathname + "?" + params)
-      })()`),
-    )
+  let replace = (params: string): unit => {
+    history.replaceState((), "", location.pathname ++ "?" ++ params)
   }
 }
 
 module Pathname = {
-  let get = () => {
-    // First char is a "/"
-    WindowBindings.pathname->String.sliceToEnd(~start=1)
+  let get = (): string => {
+    location.pathname->String.sliceToEnd(~start=1)
   }
-  let set = (value: string) => {
-    ignore(
-      %raw(`(() => {
-        const params = new URLSearchParams(location.search)
-        window.history.replaceState({}, '', value + "?" + params)
-      })()`),
-    )
+
+  let set = (value: string): unit => {
+    let params = URLSearchParams.make(location.search)
+    history.replaceState((), "", value ++ "?" ++ params->URLSearchParams.toString)
   }
 }

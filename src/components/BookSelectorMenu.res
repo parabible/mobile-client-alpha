@@ -2,13 +2,8 @@
 
 open IonicBindings
 
-let clearSearchInput = currentSearchInputRef => {
-  ignore(
-    %raw(`(async () => {
-      (await currentSearchInputRef.getInputElement()).value = "";
-    })()`),
-  )
-  ()
+let clearSearchInput = (currentSearchInputRef: Dom.element) => {
+  currentSearchInputRef->Webapi.Dom.Element.setNodeValue(Js.Value(""))
 }
 
 let getEventValue = e => {
@@ -69,7 +64,10 @@ let make = () => {
     setSelectedBookState(_ => None)
     setCurrentMode(_ => Book)
     setSearchValue(_ => "")
-    clearSearchInput(inputRef.current)
+    switch inputRef.current {
+    | Null | Undefined => ()
+    | Value(current) => clearSearchInput(current)
+    }
   }
   let onChapterSelect = chapter => {
     switch selectedBook {
@@ -91,7 +89,12 @@ let make = () => {
     ? <FilteredBookList filterValue={searchValue} selectBook={setSelectedBook} />
     : <FullBookList selectBook={setSelectedBook} />
 
-  <IonMenu side="start" menuId="book-selector" contentId="main" \"type"="overlay" ionDidClose={{emit: _ => resetSearch()}}>
+  <IonMenu
+    side="start"
+    menuId="book-selector"
+    contentId="main"
+    \"type"="overlay"
+    ionDidClose={{emit: _ => resetSearch()}}>
     <IonContent className="ion-padding">
       <IonSearchbar ref={ReactDOM.Ref.domRef(inputRef)} onIonInput={onSearchInput} />
       {switch (currentMode, selectedBook) {
