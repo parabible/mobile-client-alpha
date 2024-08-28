@@ -293,7 +293,7 @@ module OrderedResults = {
         corpusResults
         ->Array.at(0)
         ->Option.getOr([])
-        ->Array.mapWithIndex((x, i) => {
+        ->Array.mapWithIndex((_, i) => {
           let onlyColumnI: array<option<teMatch>> = corpusResults->Array.map(row => row[i])
           onlyColumnI->Array.some(t => t->Option.getOr([])->Array.length > 0)
         })
@@ -301,65 +301,65 @@ module OrderedResults = {
         visibleModules->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
 
       <>
-      {corpusIndex > 0 ? <hr className="my-8 mx-8 h-px border-t-0 divider" /> : <> </>}
-      <table key={corpusIndex->Int.toString}>
-        <thead>
-          <tr>
-            {textualEditionsForCorpus
-            ->Array.map(t => {
-              <td
-                style={{textAlign: "center", fontWeight: "bold"}}
-                key={t.id->Int.toString}
-                width={(100 / Array.length(textualEditionsForCorpus))->Int.toString ++ "%"}>
-                {t.abbreviation->React.string}
-              </td>
-            })
-            ->React.array}
-          </tr>
-        </thead>
-        <tbody>
-          {corpusResults
-          ->Array.mapWithIndex((row, ri) =>
-            [
-              <tr key={ri->Int.toString ++ "a"}>
-                <td colSpan={row->Array.length} className="search-result-reference">
-                  {row->getFirstRidForRow->Books.ridToReferenceString->React.string}
+        {corpusIndex > 0 ? <hr className="my-8 mx-8 h-px border-t-0 divider" /> : <> </>}
+        <table key={corpusIndex->Int.toString}>
+          <thead>
+            <tr>
+              {textualEditionsForCorpus
+              ->Array.map(t => {
+                <td
+                  style={{textAlign: "center", fontWeight: "bold"}}
+                  key={t.id->Int.toString}
+                  width={(100 / Array.length(textualEditionsForCorpus))->Int.toString ++ "%"}>
+                  {t.abbreviation->React.string}
                 </td>
-              </tr>,
-              <tr key={ri->Int.toString ++ "b"}>
-                {row
-                ->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
-                ->Array.mapWithIndex(
-                  (textualEditionResult, ti) => {
-                    switch ti->getTextualEditionByIndex {
-                    | None => "Something went wrong identifying this textualEdition"->React.string
-                    | Some(t) =>
-                      <td
-                        key={ti->Int.toString}
-                        className="verseText"
-                        style={TextObject.getStyleFor(t.abbreviation)}>
-                        {textualEditionResult
-                        ->Array.mapWithIndex(
-                          (v, vi) =>
-                            <TextObject.VerseSpan
-                              key={vi->Int.toString}
-                              textObject={v}
-                              textualEditionId={t.id}
-                              verseNumber={Some(mod(v.rid, 1000))}
-                            />,
-                        )
-                        ->React.array}
-                      </td>
-                    }
-                  },
-                )
-                ->React.array}
-              </tr>,
-            ]->React.array
-          )
-          ->React.array}
-        </tbody>
-      </table>
+              })
+              ->React.array}
+            </tr>
+          </thead>
+          <tbody>
+            {corpusResults
+            ->Array.mapWithIndex((row, ri) =>
+              [
+                <tr key={ri->Int.toString ++ "a"}>
+                  <td colSpan={row->Array.length} className="search-result-reference">
+                    {row->getFirstRidForRow->Books.ridToReferenceString->React.string}
+                  </td>
+                </tr>,
+                <tr key={ri->Int.toString ++ "b"}>
+                  {row
+                  ->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
+                  ->Array.mapWithIndex(
+                    (textualEditionResult, ti) => {
+                      switch ti->getTextualEditionByIndex {
+                      | None => "Something went wrong identifying this textualEdition"->React.string
+                      | Some(t) =>
+                        <td
+                          key={ti->Int.toString}
+                          className="verseText"
+                          style={TextObject.getStyleFor(t.abbreviation)}>
+                          {textualEditionResult
+                          ->Array.mapWithIndex(
+                            (v, vi) =>
+                              <TextObject.VerseSpan
+                                key={vi->Int.toString}
+                                textObject={v}
+                                textualEditionId={t.id}
+                                verseNumber={Some(mod(v.rid, 1000))}
+                              />,
+                          )
+                          ->React.array}
+                        </td>
+                      }
+                    },
+                  )
+                  ->React.array}
+                </tr>,
+              ]->React.array
+            )
+            ->React.array}
+          </tbody>
+        </table>
       </>
     })
     ->React.array
