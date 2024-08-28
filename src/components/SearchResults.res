@@ -26,6 +26,7 @@ let getUrl = (
   ~textualEditionAbbreviations,
   ~syntaxFilter: State.syntaxFilter,
   ~corpusFilter: State.corpusFilter,
+  ~currentReference: Books.reference,
   ~pageNumber,
   ~pageSize,
 ) => {
@@ -33,7 +34,7 @@ let getUrl = (
   let syntaxFilter = `treeNodeType=${State.syntaxFilterToTreeNodeTypeString(syntaxFilter)}`
   let corpusFilter = switch corpusFilter {
   | None => ""
-  | corpusFilter => `corpusFilter=${State.corpusToReferenceString(corpusFilter)}`
+  | corpusFilter => `corpusFilter=${State.corpusToReferenceString(corpusFilter, currentReference)}`
   }
   let pageNumber = `page=${pageNumber->Int.toString}`
   let pageSize = `pageSize=${pageSize->Int.toString}`
@@ -50,6 +51,7 @@ let getSearchResults = async (
   ~serializedSearchTerms,
   ~syntaxFilter,
   ~corpusFilter,
+  ~currentReference,
   ~textualEditionAbbreviations,
   ~pageNumber,
   ~pageSize,
@@ -59,6 +61,7 @@ let getSearchResults = async (
     ~textualEditionAbbreviations,
     ~syntaxFilter,
     ~corpusFilter,
+    ~currentReference,
     ~pageNumber,
     ~pageSize,
   )
@@ -373,6 +376,7 @@ let make = () => {
   let (matchingText, setMatchingText) = React.useState(_ => None)
   let (pageNumber, setPageNumber) = React.useState(_ => 0)
   let searchTerms = Store.store->Store.MobileClient.use(state => state.searchTerms)
+  let reference = Store.store->Store.MobileClient.use(state => state.reference)
   let serializedSearchTerms = SearchTermSerde.serializeSearchTerms(
     (searchTerms :> array<SearchTermSerde.searchTerm>),
   )
@@ -395,7 +399,7 @@ let make = () => {
     None
   }, [serializedSearchTerms])
 
-  React.useEffect5(() => {
+  React.useEffect6(() => {
     // TODO: make sure that only pagenumber has changed...
     if searchTerms->Array.length === 0 {
       setMatchingText(_ => None)
@@ -408,6 +412,7 @@ let make = () => {
           ~serializedSearchTerms,
           ~syntaxFilter,
           ~corpusFilter,
+          ~currentReference=reference,
           ~textualEditionAbbreviations,
           ~pageNumber,
           ~pageSize=pageSizeConstant,
@@ -452,7 +457,14 @@ let make = () => {
       )
     }
     None
-  }, (serializedSearchTerms, syntaxFilter, corpusFilter, textualEditionAbbreviations, pageNumber))
+  }, (
+    serializedSearchTerms,
+    syntaxFilter,
+    corpusFilter,
+    reference,
+    textualEditionAbbreviations,
+    pageNumber,
+  ))
 
   let totalPages =
     (resultsCount->Int.toFloat /. pageSizeConstant->Int.toFloat)->Js.Math.ceil_int - 1

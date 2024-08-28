@@ -6,9 +6,10 @@ let availableSyntaxFilters: array<syntaxFilter> = [Phrase, Clause, Sentence, Ver
 
 let defaultSyntaxFilter = "Verse"
 
-type corpusFilter = WholeBible | OldTestament | Pentateuch | NewTestament | None
+type corpusFilter = CurrentBook | WholeBible | OldTestament | Pentateuch | NewTestament | None
 
 let availableCorpusFilters: array<corpusFilter> = [
+  CurrentBook,
   WholeBible,
   OldTestament,
   Pentateuch,
@@ -52,6 +53,7 @@ let syntaxFilterToTreeNodeTypeString = (syntaxFilter: syntaxFilter) =>
 
 let corpusFilterStringToVariant = (corpusFilterString: string) =>
   switch corpusFilterString {
+  | "Current Book" => CurrentBook
   | "Whole Bible" => WholeBible
   | "Old Testament" => OldTestament
   | "Pentateuch" => Pentateuch
@@ -62,6 +64,7 @@ let corpusFilterStringToVariant = (corpusFilterString: string) =>
 
 let corpusFilterVariantToString = (corpusFilter: corpusFilter) =>
   switch corpusFilter {
+  | CurrentBook => "Current Book"
   | WholeBible => "Whole Bible"
   | OldTestament => "Old Testament"
   | Pentateuch => "Pentateuch"
@@ -69,8 +72,9 @@ let corpusFilterVariantToString = (corpusFilter: corpusFilter) =>
   | None => "No Filter"
   }
 
-let corpusToReferenceString = (corpusFilter: corpusFilter) =>
+let corpusToReferenceString = (corpusFilter: corpusFilter, currentReference: Books.reference) =>
   switch corpusFilter {
+  | CurrentBook => currentReference.book
   | WholeBible => "gen-rev"
   | OldTestament => "gen-mal"
   | Pentateuch => "gen-deut"
