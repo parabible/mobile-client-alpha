@@ -49,3 +49,8 @@
 .ion-palette-dark .overlay {
     background-color: rgba(0, 0, 0, 0.6);
 }
+
+.fullscreen-modal {
+    --width: 100%;
+    --height: 100%;
+}

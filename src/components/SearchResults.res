@@ -418,7 +418,7 @@ let make = () => {
     setPageNumber(_ => totalPages)
   }
 
-  <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults}>
+  <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults} className="fullscreen-modal">
     <IonHeader>
       <IonToolbar color={#light}>
         <IonButtons slot="start">
