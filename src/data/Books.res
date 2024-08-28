@@ -44,7 +44,7 @@ let books = allBooks->Array.filterMap(b => b)
 
 type bookChapterPair = {
   book: string,
-  chapter: string,
+  chapters: string,
 }
 let allChapters: array<bookChapterPair> =
   books
@@ -52,28 +52,29 @@ let allChapters: array<bookChapterPair> =
     (
       b.hasPrologue ? Belt.Array.range(0, b.chapters - 1) : Belt.Array.range(1, b.chapters)
     )->Array.map(c => {
-      chapter: c->Int.toString,
+      chapters: c->Int.toString,
       book: b.name,
     })
   )
   ->Array.flat
 
-let getAdjacentChapter: (reference, bool) => reference = (
-  reference: reference,
-  forward,
-) => {
+let getAdjacentChapter: (reference, bool) => reference = (reference: reference, forward) => {
   let bcPairIndex =
     allChapters->Array.findIndex((bcp: bookChapterPair) =>
-      bcp.book === reference.book && bcp.chapter === reference.chapter
+      bcp.book === reference.book && bcp.chapters === reference.chapter
     ) + (forward ? 1 : -1)
   let functionalBcPairIndex = bcPairIndex >= allChapters->Array.length ? 0 : bcPairIndex
 
-  (allChapters
-  ->Array.at(functionalBcPairIndex)
-  ->Option.getOr({
-    chapter: "1",
-    book: "Genesis",
-  }) :> reference)
+  switch allChapters->Array.at(functionalBcPairIndex) {
+  | Some(bcPair) => {
+      book: bcPair.book,
+      chapter: bcPair.chapters,
+    }
+  | None => {
+      book: "Genesis",
+      chapter: "1",
+    }
+  }
 }
 
 let getBookAbbreviation = book => {
@@ -84,7 +85,7 @@ let getBookAbbreviation = book => {
   }
 }
 
-let ridToRef = rid => {
+let ridToReferenceString = rid => {
   let book = rid / 1000000 - 1
   let chapter = mod(rid / 1000, 1000)
   let verse = mod(rid, 1000)
@@ -101,4 +102,25 @@ let ridToRef = rid => {
     })
 
   bookObj.name ++ " " ++ chapter->Int.toString ++ ":" ++ verse->Int.toString
+}
+
+let ridToBookChapterReference = rid => {
+  let book = rid / 1000000 - 1
+  let chapter = mod(rid / 1000, 1000)
+
+  let bookObj =
+    allBooks
+    ->Array.get(book)
+    ->Option.getOr(None)
+    ->Option.getOr({
+      name: "Unknown",
+      abbreviation: "Unk",
+      chapters: 0,
+      hasPrologue: false,
+    })
+
+  {
+    book: bookObj.name,
+    chapter: chapter->Int.toString,
+  }
 }

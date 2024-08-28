@@ -259,64 +259,107 @@ module SearchTermMenu = {
 }
 
 module OrderedResults = {
+  let splitByCorpus = results => {
+    let corpora =
+      results
+      ->Array.map(row => {
+        let rid = row->getFirstRidForRow
+        let reference = rid->Books.ridToBookChapterReference
+        reference->ReferenceParser.getCorpusFromReference
+      })
+      ->Set.fromArray
+      ->Set.values
+      ->Array.fromIterator
+    corpora->Array.map(corpus =>
+      results->Array.filter(row => {
+        let rid = row->getFirstRidForRow
+        let reference = rid->Books.ridToBookChapterReference
+        let corpusFromReference = reference->ReferenceParser.getCorpusFromReference
+        corpusFromReference == corpus
+      })
+    )
+  }
   @react.component
   let make = (~results, ~visibleModules: array<State.textualEdition>) => {
     let getTextualEditionByIndex = index => visibleModules->Array.get(index)
-    <table>
-      <thead>
-        <tr>
-          {visibleModules
-          ->Array.map(t => {
-            <td
-              style={{textAlign: "center", fontWeight: "bold"}}
-              key={t.id->Int.toString}
-              width={(100 / Array.length(visibleModules))->Int.toString ++ "%"}>
-              {t.abbreviation->React.string}
-            </td>
-          })
-          ->React.array}
-        </tr>
-      </thead>
-      <tbody>
-        {results
-        ->Array.mapWithIndex((row, ri) =>
-          [
-            <tr key={ri->Int.toString ++ "a"}>
-              <td colSpan={row->Array.length} className="search-result-reference">
-                {row->getFirstRidForRow->Books.ridToRef->React.string}
+
+    results
+    ->splitByCorpus
+    ->Array.mapWithIndex((corpusResults, corpusIndex) => {
+      let columnHasData =
+        corpusResults
+        ->Array.at(0)
+        ->Option.getOr([])
+        ->Array.mapWithIndex((x, i) => {
+          let onlyColumnI: array<option<teMatch>> = corpusResults->Array.map(row => row[i])
+          onlyColumnI->Array.some(t => t->Option.getOr([])->Array.length > 0)
+        })
+      let textualEditionsForCorpus =
+        visibleModules->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
+
+      <>
+      {corpusIndex > 0 ? <hr className="my-8 mx-8 h-px border-t-0 divider" /> : <> </>}
+      <table key={corpusIndex->Int.toString}>
+        <thead>
+          <tr>
+            {textualEditionsForCorpus
+            ->Array.map(t => {
+              <td
+                style={{textAlign: "center", fontWeight: "bold"}}
+                key={t.id->Int.toString}
+                width={(100 / Array.length(textualEditionsForCorpus))->Int.toString ++ "%"}>
+                {t.abbreviation->React.string}
               </td>
-            </tr>,
-            <tr key={ri->Int.toString ++ "b"}>
-              {row
-              ->Array.mapWithIndex((textualEditionResult, ti) => {
-                switch ti->getTextualEditionByIndex {
-                | None => "Something went wrong identifying this textualEdition"->React.string
-                | Some(t) =>
-                  <td
-                    key={ti->Int.toString}
-                    className="verseText"
-                    style={TextObject.getStyleFor(t.abbreviation)}>
-                    {textualEditionResult
-                    ->Array.mapWithIndex(
-                      (v, vi) =>
-                        <TextObject.VerseSpan
-                          key={vi->Int.toString}
-                          textObject={v}
-                          textualEditionId={t.id}
-                          verseNumber={Some(mod(v.rid, 1000))}
-                        />,
-                    )
-                    ->React.array}
-                  </td>
-                }
-              })
-              ->React.array}
-            </tr>,
-          ]->React.array
-        )
-        ->React.array}
-      </tbody>
-    </table>
+            })
+            ->React.array}
+          </tr>
+        </thead>
+        <tbody>
+          {corpusResults
+          ->Array.mapWithIndex((row, ri) =>
+            [
+              <tr key={ri->Int.toString ++ "a"}>
+                <td colSpan={row->Array.length} className="search-result-reference">
+                  {row->getFirstRidForRow->Books.ridToReferenceString->React.string}
+                </td>
+              </tr>,
+              <tr key={ri->Int.toString ++ "b"}>
+                {row
+                ->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
+                ->Array.mapWithIndex(
+                  (textualEditionResult, ti) => {
+                    switch ti->getTextualEditionByIndex {
+                    | None => "Something went wrong identifying this textualEdition"->React.string
+                    | Some(t) =>
+                      <td
+                        key={ti->Int.toString}
+                        className="verseText"
+                        style={TextObject.getStyleFor(t.abbreviation)}>
+                        {textualEditionResult
+                        ->Array.mapWithIndex(
+                          (v, vi) =>
+                            <TextObject.VerseSpan
+                              key={vi->Int.toString}
+                              textObject={v}
+                              textualEditionId={t.id}
+                              verseNumber={Some(mod(v.rid, 1000))}
+                            />,
+                        )
+                        ->React.array}
+                      </td>
+                    }
+                  },
+                )
+                ->React.array}
+              </tr>,
+            ]->React.array
+          )
+          ->React.array}
+        </tbody>
+      </table>
+      </>
+    })
+    ->React.array
   }
 }
 
@@ -418,7 +461,8 @@ let make = () => {
     setPageNumber(_ => totalPages)
   }
 
-  <IonModal isOpen={showSearchResults} onDidDismiss={hideSearchResults} className="fullscreen-modal">
+  <IonModal
+    isOpen={showSearchResults} onDidDismiss={hideSearchResults} className="fullscreen-modal">
     <IonHeader>
       <IonToolbar color={#light}>
         <IonButtons slot="start">

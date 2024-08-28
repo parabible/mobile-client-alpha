@@ -54,3 +54,11 @@
     --width: 100%;
     --height: 100%;
 }
+
+.divider {
+    background-color: #e2e8f0;
+}
+
+.ion-palette-dark .divider {
+    background-color: #4b5563;
+}
