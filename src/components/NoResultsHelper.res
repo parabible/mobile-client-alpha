@@ -118,10 +118,11 @@ module BroadenCorpus = {
     | _ =>
       <div className="border-2 rounded m-2 p-2 text-center">
         <div>
-          {`You are currently searching within the ${corpusFilter->State.corpusFilterVariantToString}.`->React.string}
+          {`You are currently searching within the `->React.string}
+          <b> {corpusFilter->State.corpusFilterVariantToString->React.string} </b>
         </div>
         <div>
-          <IonButton id="book-filter-trigger-alert">
+          <IonButton id="book-filter-trigger-alert" expand={#full}>
             {`Change corpus filter`->React.string}
           </IonButton>
           <IonAlert
