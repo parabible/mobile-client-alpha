@@ -263,6 +263,7 @@ type buttonExpand = [#block | #full]
 type buttonFill = [#clear | #outline | #solid]
 type buttonSize = [#small | #default | #large]
 type buttonShape = [#round]
+type buttonSlot = [#start | #end]
 module IonButton = {
   @module("@ionic/react") @react.component
   external make: (
@@ -274,6 +275,7 @@ module IonButton = {
     ~shape: buttonShape=?,
     ~size: buttonSize=?,
     ~fill: buttonFill=?,
+    ~slot: buttonSlot=?,
     ~style: ReactDOM.Style.t=?,
     ~className: string=?,
     ~children: React.element=?,

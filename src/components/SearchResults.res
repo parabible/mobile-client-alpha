@@ -82,8 +82,8 @@ let getFirstRidForRow = (row: resultRow) =>
 
 module CenteredDiv = {
   @react.component
-  let make = (~children) => {
-    <div className="centered"> {children} </div>
+  let make = (~children, ~className="") => {
+    <div className={"centered " ++ className}> {children} </div>
   }
 }
 
@@ -111,12 +111,7 @@ module SearchTermItem = {
     <IonItemSliding>
       <IonItem detail={true}>
         <IonLabel>
-          <h2>
-            {term.data
-            ->Array.map(({value}) => `${value}`)
-            ->Array.join(" ")
-            ->React.string}
-          </h2>
+          <h2> {term->State.searchTermToFriendlyString->React.string} </h2>
           <p> {(term.inverted ? "inverted" : "")->React.string} </p>
         </IonLabel>
       </IonItem>
@@ -366,6 +361,29 @@ module OrderedResults = {
   }
 }
 
+module NoResults = {
+  @react.component
+  let make = () => {
+    let (showSuggestions, setShowSuggestions) = React.useState(_ => false)
+    let onDismissSuggestions = () => setShowSuggestions(_ => false)
+
+    <CenteredDiv className="flex-col">
+      <NoResultsHelper show={showSuggestions} onDismiss={onDismissSuggestions} />
+      <div className="text-xl flex flex-col items-center">
+        <div className="rounded-full text-gray-400 bg-gray-100 text-9xl p-12 flex items-center">
+          <IonIcon icon={IonIcons.search} />
+        </div>
+      </div>
+      <div className="mt-4 mb-8 text-xl font-bold">
+        {"No results match your query"->React.string}
+      </div>
+      <IonButton shape={#round} onClick={_ => setShowSuggestions(_ => true)}>
+        {"Suggestions"->React.string}
+      </IonButton>
+    </CenteredDiv>
+  }
+}
+
 type mode = Ready | Loading | Error
 
 @react.component
@@ -505,7 +523,7 @@ let make = () => {
         switch (matchingText, resultsCount) {
         | (None, _) =>
           <CenteredDiv> {"Something has gone horribly wrong"->React.string} </CenteredDiv>
-        | (Some(_), 0) => <CenteredDiv> {"No results"->React.string} </CenteredDiv>
+        | (Some(_), 0) => <NoResults />
         | (Some(matchingText), _) =>
           <>
             <div className={"result-count"}>

@@ -23,6 +23,9 @@ type reference = {book: string, chapter: string}
 
 type chapterLoadingState = Ready | Loading | Error
 
+let searchTermToFriendlyString = (term: SearchTermSerde.searchTerm) =>
+  term.data->Array.map(({value}) => value)->Array.join(" ")
+
 let syntaxFilterStringToVariant = (syntaxFilterString: string) =>
   switch syntaxFilterString {
   | "Verse" => Verse
