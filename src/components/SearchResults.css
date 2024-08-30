@@ -62,3 +62,10 @@
 .ion-palette-dark .divider {
     background-color: #4b5563;
 }
+
+.no-results-icon {
+    @apply rounded-full text-gray-400 bg-gray-100 dark:bg-gray-900 text-9xl p-12 flex items-center
+}
+.ion-palette-dark .no-results-icon {
+    @apply text-gray-700 bg-gray-800
+}

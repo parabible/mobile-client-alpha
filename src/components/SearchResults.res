@@ -370,11 +370,11 @@ module NoResults = {
     <CenteredDiv className="flex-col">
       <NoResultsHelper show={showSuggestions} onDismiss={onDismissSuggestions} />
       <div className="text-xl flex flex-col items-center">
-        <div className="rounded-full text-gray-400 bg-gray-100 text-9xl p-12 flex items-center">
+        <div className="no-results-icon">
           <IonIcon icon={IonIcons.search} />
         </div>
       </div>
-      <div className="mt-4 mb-8 text-xl font-bold">
+      <div className="mt-4 mb-8 text-xl font-bold text-gray-500">
         {"No results match your query"->React.string}
       </div>
       <IonButton shape={#round} onClick={_ => setShowSuggestions(_ => true)}>
