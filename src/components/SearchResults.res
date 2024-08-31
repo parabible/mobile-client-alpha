@@ -384,6 +384,31 @@ module NoResults = {
   }
 }
 
+module NoSearchTerms = {
+  @react.component
+  let make = () => {
+    let darkMode = Store.store->Store.MobileClient.use(state => state.darkMode)
+    <CenteredDiv className="flex-col">
+      <div className="text-xl flex flex-col items-center">
+        <div className="no-results-icon">
+          <IonIcon icon={IonIcons.search} />
+        </div>
+      </div>
+      <div
+        className={"mt-4 mb-8 text-xl font-bold text-center " ++ (
+          darkMode ? "text-gray-300" : "text-gray-600"
+        )}>
+        {"No search terms"->React.string}
+      </div>
+      <div className="w-3/4 mt-4 mb-8 text-lg text-gray-500 text-center align-middle">
+        {"Build a search by touching a word and clicking the "->React.string}
+        <IonIcon icon={IonIcons.search} />
+        {" button"->React.string}
+      </div>
+    </CenteredDiv>
+  }
+}
+
 type mode = Ready | Loading | Error
 
 @react.component
@@ -518,7 +543,7 @@ let make = () => {
       {switch (currentMode, searchTerms->Array.length > 0) {
       | (Error, _) =>
         <CenteredDiv> {"Something has gone horribly wrong"->React.string} </CenteredDiv>
-      | (_, false) => <CenteredDiv> {"No search terms"->React.string} </CenteredDiv>
+      | (_, false) => <NoSearchTerms />
       | (_, true) =>
         switch (matchingText, resultsCount) {
         | (None, _) =>
