@@ -10,6 +10,11 @@ export default defineConfig({
     }),
     VitePWA({
       registerType: "autoUpdate",
+      manifest: {
+        name: "Parabible Mobile",
+        short_name: "Parabible",
+        description: "Unlock the original languages with morphologically parsed and tagged Greek, Hebrew and Aramaic for searching and studying the Bible (both Old and New Testament)."
+      }
     }),
   ],
 });
