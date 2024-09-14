@@ -19,6 +19,19 @@ module TextualEditionLabel = {
   }
 }
 
+let withMovedElement = (arr, fromPos, toPos) => {
+  let newArr = Array.copy(arr)
+  let element = newArr[fromPos]
+  switch element {
+  | None => Console.error("Element not found")
+  | Some(element) => {
+      Array.splice(newArr, ~start=fromPos, ~remove=1, ~insert=[])
+      Array.splice(newArr, ~start=toPos, ~remove=0, ~insert=[element])
+    }
+  }
+  newArr
+}
+
 type textualEditionDisplayOptionsList = {
   id: string,
   option: Store.textualEditionDisplayOptions,
@@ -58,6 +71,32 @@ let make = () => {
     ->Array.find(v => v.option == textualEditionLanguage)
     ->Option.getOr(defaultTextualLanguageOption)
 
+  let textualEditionsToList =
+    textualEditions
+    ->Array.filter(te => !filterToVisible || te.visible)
+    ->Array.filter(te =>
+      switch filterToCurrentCorpus {
+      | true => {
+          let d =
+            State.temporaryTextualEditionData->Array.find(t => t.abbreviation == te.abbreviation)
+          let corpus = reference->ReferenceParser.getCorpusFromReference
+          switch (corpus, d) {
+          | (Some(corpus), Some(d)) => d.corpora->Array.includes((corpus :> State.corpora))
+          | _ => false
+          }
+        }
+      | false => true
+      }
+    )
+    ->Array.filter(te => {
+      let d = State.temporaryTextualEditionData->Array.find(t => t.abbreviation == te.abbreviation)
+      switch actualTextualEditionDisplayOption.option {
+      | All => true
+      | English => d->Option.map(d => d.language == "English")->Option.getOr(false)
+      | SourceTexts => d->Option.map(d => d.source_text)->Option.getOr(false)
+      }
+    })
+
   let handleDisplayOptionsChange = (newValue: string) => {
     let option = textualEditionLanguageOptions->Array.find(v => v.id == newValue)
     let newValue = switch option {
@@ -79,26 +118,31 @@ let make = () => {
   }
 
   let handleReorder = (event: IonReorderGroup.event) => {
-    let from = event.detail.from
-    let to = event.detail.to
-
-    let item = Array.at(textualEditions, from)
-    switch item {
-    | None => "Item not found"->Console.error
-    | Some(item) => {
-        let newTextualEditions = Array.copy(textualEditions)
-        Array.splice(newTextualEditions, ~start=from, ~remove=1, ~insert=[])
-        Array.splice(newTextualEditions, ~start=to, ~remove=0, ~insert=[item])
+    let fromPos = event.detail.from
+    let toPos = event.detail.to
+    let anchorItem = textualEditionsToList[toPos]
+    let movingItem = textualEditionsToList[fromPos]
+    switch (anchorItem, movingItem) {
+    | (None, _) | (_, None) => Console.error("Element not found")
+    | (Some(anchorItem), Some(movingItem)) =>
+      if anchorItem.id == movingItem.id {
+        event.detail.complete()
+        ()
+      } else {
+        let movingItemIndex = textualEditions->Array.findIndex(te => te.id == movingItem.id)
+        let anchorItemIndex = textualEditions->Array.findIndex(te => te.id == anchorItem.id)
+        let newTextualEditions = withMovedElement(textualEditions, movingItemIndex, anchorItemIndex)
         setTextualEditions(newTextualEditions)
+        event.detail.complete()
+        ()
       }
     }
-    event.detail.complete()
-    ()
   }
 
   <IonMenu menuId="textualEditions" side="end" contentId="main" \"type"="overlay">
     <IonContent className="ion-padding">
       <h1 className="text-xl"> {"Textual Editions"->React.string} </h1>
+      <h2 className="text-lg mt-4"> {"Filters"->React.string} </h2>
       <IonList>
         <IonItem>
           <IonToggle
@@ -131,33 +175,7 @@ let make = () => {
       <h2 className="text-lg mt-4"> {"Reorder Textual Editions"->React.string} </h2>
       <IonList>
         <IonReorderGroup disabled={false} onIonItemReorder={handleReorder}>
-          {textualEditions
-          ->Array.filter(te => !filterToVisible || te.visible)
-          ->Array.filter(te =>
-            switch filterToCurrentCorpus {
-            | true => {
-                let d =
-                  State.temporaryTextualEditionData->Array.find(t =>
-                    t.abbreviation == te.abbreviation
-                  )
-                let corpus = reference->ReferenceParser.getCorpusFromReference
-                switch (corpus, d) {
-                | (Some(corpus), Some(d)) => d.corpora->Array.includes((corpus :> State.corpora))
-                | _ => false
-                }
-              }
-            | false => true
-            }
-          )
-          ->Array.filter(te => {
-            let d =
-              State.temporaryTextualEditionData->Array.find(t => t.abbreviation == te.abbreviation)
-            switch actualTextualEditionDisplayOption.option {
-            | All => true
-            | English => d->Option.map(d => d.language == "English")->Option.getOr(false)
-            | SourceTexts => d->Option.map(d => d.source_text)->Option.getOr(false)
-            }
-          })
+          {textualEditionsToList
           ->Array.map(textualEdition =>
             <IonItem key={textualEdition.abbreviation}>
               <IonCheckbox
