@@ -54,9 +54,10 @@ module MobileClient = Store.MakeStore(AppStore)
 let store = MobileClient.create(set => {
   selectedWord: State.initialSelectedWord,
   setSelectedWord: selectedWord => {
-    WindowBindings.LocalStorage.setItem(
+    Dom.Storage.setItem(
       "selectedWord",
       selectedWord->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
     )
     set(state => {
       ...state,
@@ -65,9 +66,10 @@ let store = MobileClient.create(set => {
   },
   searchTerms: State.initialSearchTerms,
   setSearchTerms: newSearchTerms => {
-    WindowBindings.LocalStorage.setItem(
+    Dom.Storage.setItem(
       "searchTerms",
       newSearchTerms->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
     )
     set(state => {
       ...state,
@@ -77,9 +79,10 @@ let store = MobileClient.create(set => {
   addSearchTerm: (searchTerm: SearchTermSerde.searchTerm) => {
     set(state => {
       let searchTerms = [...state.searchTerms, searchTerm]
-      WindowBindings.LocalStorage.setItem(
+      Dom.Storage.setItem(
         "searchTerms",
         searchTerms->JSON.stringifyAny->Option.getOr(""),
+        Dom.Storage.localStorage,
       )
       {
         ...state,
@@ -90,9 +93,10 @@ let store = MobileClient.create(set => {
   deleteSearchTerm: index =>
     set(state => {
       let searchTerms = state.searchTerms->Array.filterWithIndex((_, i) => i !== index)
-      WindowBindings.LocalStorage.setItem(
+      Dom.Storage.setItem(
         "searchTerms",
         searchTerms->JSON.stringifyAny->Option.getOr(""),
+        Dom.Storage.localStorage,
       )
       {
         ...state,
@@ -101,9 +105,10 @@ let store = MobileClient.create(set => {
     }),
   syntaxFilter: State.initialSyntaxFilter,
   setSyntaxFilter: syntaxFilter => {
-    WindowBindings.LocalStorage.setItem(
+    Dom.Storage.setItem(
       "syntaxFilter",
       syntaxFilter->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
     )
     set(state => {
       ...state,
@@ -112,9 +117,10 @@ let store = MobileClient.create(set => {
   },
   corpusFilter: State.initialCorpusFilter,
   setCorpusFilter: corpusFilter => {
-    WindowBindings.LocalStorage.setItem(
+    Dom.Storage.setItem(
       "corpusFilter",
       corpusFilter->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
     )
     set(state => {
       ...state,
@@ -123,21 +129,26 @@ let store = MobileClient.create(set => {
   },
   reference: State.initialReference,
   setReference: reference => {
-    WindowBindings.LocalStorage.setItem("reference", reference->JSON.stringifyAny->Option.getOr(""))
+    Dom.Storage.setItem(
+      "reference",
+      reference->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
+    )
     set(state => {
       ...state,
       reference,
     })
   },
   targetReference: State.initialReference,
-  setTargetReference: reference => {
-    WindowBindings.LocalStorage.setItem(
+  setTargetReference: targetReference => {
+    Dom.Storage.setItem(
       "targetReference",
-      reference->JSON.stringifyAny->Option.getOr(""),
+      targetReference->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
     )
     set(state => {
       ...state,
-      targetReference: reference,
+      targetReference,
     })
   },
   chapterLoadingState: State.Loading,
@@ -160,9 +171,10 @@ let store = MobileClient.create(set => {
     }),
   textualEditions: State.initialTextualEditions,
   setTextualEditions: editions => {
-    WindowBindings.LocalStorage.setItem(
+    Dom.Storage.setItem(
       "textualEditions",
       editions->JSON.stringifyAny->Option.getOr(""),
+      Dom.Storage.localStorage,
     )
     set(state => {
       ...state,
@@ -172,7 +184,11 @@ let store = MobileClient.create(set => {
   darkMode: WindowBindings.matchMedia("(prefers-color-scheme: dark)").matches,
   setDarkMode: darkMode =>
     set(state => {
-      WindowBindings.LocalStorage.setItem("darkMode", darkMode->JSON.stringifyAny->Option.getOr(""))
+      Dom.Storage.setItem(
+        "darkMode",
+        darkMode->JSON.stringifyAny->Option.getOr(""),
+        Dom.Storage.localStorage,
+      )
       {
         ...state,
         darkMode,

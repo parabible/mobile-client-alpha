@@ -91,14 +91,14 @@ let decodeSelectedWord = Json.Decode.object(field => {
 })
 
 let initialSelectedWord =
-  WindowBindings.LocalStorage.getItem("selectedWord")
+  Dom.Storage.getItem("selectedWord", Dom.Storage.localStorage)
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
   ->Json.decode(decodeSelectedWord)
   ->Belt.Result.getWithDefault({id: -1, moduleId: -1})
 
-let showSearchResultsFromUrl = Url.Pathname.get() == "search"
+let showSearchResultsFromUrl = Webapi.Dom.location->Webapi.Dom.Location.pathname == "/search"
 
 type dataPoint = {key: string, value: string}
 
@@ -119,7 +119,7 @@ let decodeSearchTerms = Json.Decode.array(
 
 let searchTermsFromUrl = Url.SearchParams.getAll()->SearchTermSerde.deserializeSearchTermParams
 
-let searchTermsFromLocalStorage = (WindowBindings.LocalStorage.getItem("searchTerms")
+let searchTermsFromLocalStorage = (Dom.Storage.getItem("searchTerms", Dom.Storage.localStorage)
 ->Option.map(Json.parse)
 ->Option.getOr(Belt.Result.Ok(Js.Json.null))
 ->Belt.Result.getWithDefault(Js.Json.null)
@@ -137,7 +137,7 @@ let decodeSyntaxFilter = Json.Decode.string
 let syntaxFilterFromUrl = syntaxFilterStringToVariant(Url.SearchParams.get("syntaxFilter"))
 
 let syntaxFilterFromLocalStorage =
-  WindowBindings.LocalStorage.getItem("syntaxFilter")
+  Dom.Storage.getItem("syntaxFilter", Dom.Storage.localStorage)
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
@@ -156,7 +156,7 @@ let decodeCorpusFilter = Json.Decode.string
 let corpusFilterFromUrl = corpusFilterStringToVariant(Url.SearchParams.get("corpusFilter"))
 
 let corpusFilterFromLocalStorage =
-  WindowBindings.LocalStorage.getItem("corpusFilter")
+  Dom.Storage.getItem("corpusFilter", Dom.Storage.localStorage)
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
@@ -182,7 +182,7 @@ let decodeTextualEditions = Json.Decode.array(
 )
 
 let initialTextualEditions =
-  WindowBindings.LocalStorage.getItem("textualEditions")
+  Dom.Storage.getItem("textualEditions", Dom.Storage.localStorage)
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
@@ -264,7 +264,7 @@ let referenceFromUrl = (ReferenceParser.parse(Url.SearchParams.get("ref")) :> op
 >)
 
 let initialReference = referenceFromUrl->Option.getOr(
-  WindowBindings.LocalStorage.getItem("reference")
+  Dom.Storage.getItem("reference", Dom.Storage.localStorage)
   ->Option.map(Json.parse)
   ->Option.getOr(Belt.Result.Ok(Js.Json.null))
   ->Belt.Result.getWithDefault(Js.Json.null)
