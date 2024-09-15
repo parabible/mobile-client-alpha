@@ -99,10 +99,35 @@ module WordNode = {
 
 module VerseNumber = {
   @react.component
-  let make = (~verseNumber: option<int>) => {
-    switch verseNumber {
-    | Some(v) => <span className="verseNumber"> {v->Int.toString->React.string} </span>
-    | None => <> </>
+  let make = (
+    ~verseNumber: option<int>,
+    ~chapterNumber: option<int>,
+    ~expectedVerse: option<int>,
+    ~expectedChapter: option<int>,
+  ) => {
+    switch (verseNumber, chapterNumber, expectedVerse, expectedChapter) {
+    | (None, _, _, _) => <> </>
+    | (Some(v), Some(c), Some(ev), Some(ec)) =>
+      if c != ec {
+        <span className="verseNumber highlightChapterDifference">
+          {(c->Int.toString ++ ":" ++ v->Int.toString)->React.string}
+        </span>
+      } else if v != ev {
+        <span className="verseNumber highlightVerseDifference">
+          {v->Int.toString->React.string}
+        </span>
+      } else {
+        <span className="verseNumber"> {v->Int.toString->React.string} </span>
+      }
+    | (Some(v), _, Some(ev), _) =>
+      if v != ev {
+        <span className="verseNumber highlightVerseDifference">
+          {v->Int.toString->React.string}
+        </span>
+      } else {
+        <span className="verseNumber"> {v->Int.toString->React.string} </span>
+      }
+    | (Some(v), _, _, _) => <span className="verseNumber"> {v->Int.toString->React.string} </span>
     }
   }
 }
@@ -113,19 +138,22 @@ module VerseCell = {
     ~textObject: textObject,
     ~textualEditionId: int,
     ~verseNumber: option<int>,
+    ~chapterNumber: option<int>,
+    ~expectedChapter: option<int>,
+    ~expectedVerse: option<int>,
     ~style: JsxDOM.style,
   ) => {
     switch textObject.\"type" {
     | "html" =>
       <td>
-        <VerseNumber verseNumber />
+        <VerseNumber verseNumber chapterNumber expectedChapter expectedVerse />
         <span
           style={style} className="verseText" dangerouslySetInnerHTML={{"__html": textObject.html}}
         />
       </td>
     | "wordArray" =>
       <td style={style} className="verseText">
-        <VerseNumber verseNumber />
+        <VerseNumber verseNumber chapterNumber expectedChapter expectedVerse />
         {textObject.wordArray
         ->Array.mapWithIndex((w, i) => {
           <WordNode key={i->Int.toString} wordPart={w} textualEditionId={textualEditionId} />
@@ -145,19 +173,22 @@ module VerseSpan = {
     ~textObject: textObject,
     ~textualEditionId: int,
     ~verseNumber: option<int>,
+    ~chapterNumber: option<int>,
+    ~expectedChapter: option<int>,
+    ~expectedVerse: option<int>,
     ~style: option<JsxDOM.style>=?,
   ) => {
     switch textObject.\"type" {
     | "html" =>
       <>
-        <VerseNumber verseNumber />
+        <VerseNumber verseNumber chapterNumber expectedVerse expectedChapter />
         <span
           style={style->Option.getOr({})} dangerouslySetInnerHTML={{"__html": textObject.html}}
         />
       </>
     | "wordArray" =>
       <span style={style->Option.getOr({})}>
-        <VerseNumber verseNumber />
+        <VerseNumber verseNumber chapterNumber expectedVerse expectedChapter />
         {textObject.wordArray
         ->Array.mapWithIndex((w, i) => {
           <WordNode key={i->Int.toString} wordPart={w} textualEditionId={textualEditionId} />

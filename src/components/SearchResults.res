@@ -322,33 +322,41 @@ module OrderedResults = {
                   </td>
                 </tr>,
                 <tr key={ri->Int.toString ++ "b"}>
-                  {row
-                  ->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
-                  ->Array.mapWithIndex(
-                    (textualEditionResult, ti) => {
-                      switch ti->getTextualEditionByIndex {
-                      | None => "Something went wrong identifying this textualEdition"->React.string
-                      | Some(t) =>
-                        <td
-                          key={ti->Int.toString}
-                          className="verseText"
-                          style={TextObject.getStyleFor(t.abbreviation)}>
-                          {textualEditionResult
-                          ->Array.mapWithIndex(
-                            (v, vi) =>
-                              <TextObject.VerseSpan
-                                key={vi->Int.toString}
-                                textObject={v}
-                                textualEditionId={t.id}
-                                verseNumber={Some(mod(v.rid, 1000))}
-                              />,
-                          )
-                          ->React.array}
-                        </td>
-                      }
-                    },
-                  )
-                  ->React.array}
+                  {
+                    let expectedVerse = mod(row->getFirstRidForRow, 1000)
+                    let expectedChapter = mod(row->getFirstRidForRow / 1000, 1000)
+                    row
+                    ->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
+                    ->Array.mapWithIndex(
+                      (textualEditionResult, ti) => {
+                        switch ti->getTextualEditionByIndex {
+                        | None =>
+                          "Something went wrong identifying this textualEdition"->React.string
+                        | Some(t) =>
+                          <td
+                            key={ti->Int.toString}
+                            className="verseText"
+                            style={TextObject.getStyleFor(t.abbreviation)}>
+                            {textualEditionResult
+                            ->Array.mapWithIndex(
+                              (v, vi) =>
+                                <TextObject.VerseSpan
+                                  key={vi->Int.toString}
+                                  textObject={v}
+                                  textualEditionId={t.id}
+                                  verseNumber={Some(mod(v.rid, 1000))}
+                                  chapterNumber={Some(mod(v.rid / 1000, 1000))}
+                                  expectedVerse={Some(expectedVerse)}
+                                  expectedChapter={Some(expectedChapter)}
+                                />,
+                            )
+                            ->React.array}
+                          </td>
+                        }
+                      },
+                    )
+                    ->React.array
+                  }
                 </tr>,
               ]->React.array
             )

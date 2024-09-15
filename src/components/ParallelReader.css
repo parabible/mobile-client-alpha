@@ -43,6 +43,19 @@
     position: relative;
     font-family: sans-serif;
 }
+
+.highlightChapterDifference {
+    color: white;
+    background: var(--ion-color-primary);
+    border-radius: 1rem;
+}
+
+.highlightVerseDifference {
+    color: var(--ion-color-primary);
+    border: 1px solid var(--ion-color-primary);
+    border-radius: 1rem;
+}
+
 .verse-table {
     margin: 0 0.6rem;
 }

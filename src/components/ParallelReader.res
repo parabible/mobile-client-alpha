@@ -55,24 +55,32 @@ module VerseTable = {
             {chapterData
             ->Array.mapWithIndex((element, i) => {
               <tr key={i->Int.toString}>
-                {element
-                ->Array.mapWithIndex((innerElement, j) => {
-                  switch (textualEditions[j], innerElement) {
-                  | (Some(t), Some(el)) =>
-                    <TextObject.VerseCell
-                      key={j->Int.toString}
-                      style={TextObject.getStyleFor(t.abbreviation)}
-                      textObject={el}
-                      textualEditionId={t.id}
-                      verseNumber={Some(mod(el.rid, 1000))}
-                    />
-                  | _ => {
-                      "Unknown textualEditionId in ParallelReader"->Console.error
-                      <td key={j->Int.toString} />
+                {
+                  let firstElement = element->Array.at(0)->Option.getOr(None)
+                  let expectedVerse = firstElement->Option.map(m => mod(m.rid, 1000))
+                  let expectedChapter = firstElement->Option.map(m => mod(m.rid / 1000, 1000))
+                  element
+                  ->Array.mapWithIndex((innerElement, j) => {
+                    switch (textualEditions[j], innerElement) {
+                    | (Some(t), Some(el)) =>
+                      <TextObject.VerseCell
+                        key={j->Int.toString}
+                        style={TextObject.getStyleFor(t.abbreviation)}
+                        textObject={el}
+                        textualEditionId={t.id}
+                        verseNumber={Some(mod(el.rid, 1000))}
+                        chapterNumber={Some(mod(el.rid / 1000, 1000))}
+                        expectedChapter={expectedChapter}
+                        expectedVerse={expectedVerse}
+                      />
+                    | _ => {
+                        "Unknown textualEditionId in ParallelReader"->Console.error
+                        <td key={j->Int.toString} />
+                      }
                     }
-                  }
-                })
-                ->React.array}
+                  })
+                  ->React.array
+                }
               </tr>
             })
             ->React.array}
