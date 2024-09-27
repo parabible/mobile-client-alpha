@@ -38,21 +38,23 @@
     font-size: 0.7rem;
     font-weight: bold;
     color: var(--ion-color-primary);
-    padding: 0 0.5em;
     top: -0.4rem;
+    margin-inline-end: 0.5rem;
     position: relative;
     font-family: sans-serif;
 }
 
 .highlightChapterDifference {
-    color: white;
-    background: var(--ion-color-primary);
+    padding: 0.1rem 0.2rem;
+    color: var(--ion-color-primary);
+    border: 1px solid var(--ion-color-primary);
     border-radius: 1rem;
 }
 
 .highlightVerseDifference {
-    color: var(--ion-color-primary);
-    border: 1px solid var(--ion-color-primary);
+    padding: 0.1rem 0.2rem;
+    color: white;
+    background: var(--ion-color-primary);
     border-radius: 1rem;
 }
 
