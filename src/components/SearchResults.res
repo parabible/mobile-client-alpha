@@ -326,13 +326,12 @@ module OrderedResults = {
                     let expectedVerse = mod(row->getFirstRidForRow, 1000)
                     let expectedChapter = mod(row->getFirstRidForRow / 1000, 1000)
                     row
-                    ->Array.filterWithIndex((_, i) => columnHasData[i]->Option.getOr(false))
                     ->Array.mapWithIndex(
                       (textualEditionResult, ti) => {
-                        switch ti->getTextualEditionByIndex {
-                        | None =>
+                        switch (columnHasData[ti], ti->getTextualEditionByIndex) {
+                        | (Some(true), None) =>
                           "Something went wrong identifying this textualEdition"->React.string
-                        | Some(t) =>
+                        | (Some(true), Some(t)) =>
                           <td
                             key={ti->Int.toString}
                             className="verseText"
@@ -352,6 +351,7 @@ module OrderedResults = {
                             )
                             ->React.array}
                           </td>
+                        | (_, _) => <> </>
                         }
                       },
                     )
